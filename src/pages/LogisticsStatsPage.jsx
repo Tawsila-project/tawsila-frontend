@@ -45,6 +45,7 @@ export default function LogisticsStatsPage() {
           </ResponsiveContainer>
         </Box>
       </Paper>
+      
     </Box>
   );
 }
