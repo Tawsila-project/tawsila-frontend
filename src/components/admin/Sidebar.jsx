@@ -143,7 +143,9 @@ export default function DashboardLayout() {
           bgcolor: "#f3f4f6", // light background for main content
         }}
       >
+        
         <Outlet />
+
       </Box>
     </Box>
   );
