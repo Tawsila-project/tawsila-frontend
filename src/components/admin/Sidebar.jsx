@@ -28,8 +28,8 @@ export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const menu = [
-    { name: "Staff", path: "/staff", icon: <People /> },
-    { name: "Orders", path: "/orders", icon: <ShoppingCart /> },
+    { name: "staffs", path: "/StaffElPage", icon: <People /> },
+    { name: "Orders", path: "/OrdersElPage", icon: <ShoppingCart /> },
     { name: "Logistics Stats", path: "/logistics-stats", icon: <BarChart /> },
     { name: "Places Stats", path: "/places-stats", icon: <Map /> },
   ];
