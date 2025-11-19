@@ -28,7 +28,7 @@ function App() {
           <Route path="/RateDelivery" element={<RateDelivery />} />
           <Route path="/WelcomeCustomer" element={<WelcomeCustomer />} />
           <Route index element={<StaffElPage />} />
-          <Route path="staffEL" element={<StaffPage />} />
+          <Route path="StaffElPage" element={<StaffPage />} />
           <Route path="OrdersElPage" element={<OrdersElPage />} />
           <Route path="logistics-stats" element={<LogisticsStatsPage />} />
           <Route path="places-stats" element={<PlacesStatsPage />} />
