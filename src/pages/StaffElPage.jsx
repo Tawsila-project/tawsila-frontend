@@ -21,8 +21,8 @@ import { Edit, Delete } from "@mui/icons-material";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState([
-    { id: 1, name: "Ahmed", phone: "94343", address: "London", username: "ahmed232" },
-    { id: 2, name: "Sara", phone: "12345", address: "Paris", username: "sara01" },
+    { id: 1, name: "Ahmed", phone: "94343", address: "Tripoli, mina", username: "ahmed232" },
+    { id: 2, name: "Samir", phone: "12345", address: "Abu samra", username: "samir79" },
   ]);
   const [search, setSearch] = useState("");
   const [openDialog, setOpenDialog] = useState(false);

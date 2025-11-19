@@ -21,7 +21,7 @@ const initialOrders = [
     id: "#4353",
     customer: "Samir",
     phone: "43434",
-    address: "Liverpool",
+    address: "Tripoli",
     assigned: "12:32",
     status: "Received",
   },
