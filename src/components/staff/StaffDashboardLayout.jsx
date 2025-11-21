@@ -14,7 +14,7 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import { Menu as MenuIcon, People, ShoppingCart, Logout } from "@mui/icons-material";
+import { Menu as MenuIcon, People,Map, ShoppingCart, Logout } from "@mui/icons-material";
 
 const drawerWidth = 240;
 
@@ -24,6 +24,8 @@ export default function StaffDashboardLayout() {
   const menu = [
     { name: "Staff", path: "/staff/dashboard/staff", icon: <People /> },
     { name: "Orders", path: "/staff/dashboard/orders", icon: <ShoppingCart /> },
+    { name: "Tracking", path: "/staff/dashboard/tracking", icon: <Map /> },
+
   ];
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -46,6 +48,8 @@ export default function StaffDashboardLayout() {
           >
             <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
             <ListItemText primary={item.name} />
+
+          
           </ListItem>
         ))}
       </List>
