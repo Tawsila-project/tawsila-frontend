@@ -29,10 +29,7 @@ export default function Login() {
       else {
         navigate("/staff/dashboard");
       }
-      //  else {
-      //   navigate("/WelcomeCustomer");
-      // }
-
+   
 
     } catch (err) {
       alert(err.response?.data?.error || "Login failed");
