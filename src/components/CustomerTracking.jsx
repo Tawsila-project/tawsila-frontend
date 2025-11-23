@@ -24,18 +24,46 @@ const homeIcon = new L.Icon({
     popupAnchor: [0, -40]
 });
 
+// function MapController({ driverLoc, customerLoc }) {
+//     const map = useMap();
+
+//     useEffect(() => {
+//         if (!driverLoc || !customerLoc) return;
+
+//         const bounds = L.latLngBounds([
+//             [driverLoc.lat, driverLoc.lng],
+//             [customerLoc.lat, customerLoc.lng]
+//         ]);
+
+//         map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16, animate: true });
+
+//     }, [driverLoc, customerLoc, map]);
+
+//     return null;
+// }
+
 function MapController({ driverLoc, customerLoc }) {
     const map = useMap();
 
     useEffect(() => {
-        if (!driverLoc || !customerLoc) return;
+        // لا يمكننا فعل شيء بدون موقع العميل
+        if (!customerLoc) return; 
 
-        const bounds = L.latLngBounds([
-            [driverLoc.lat, driverLoc.lng],
-            [customerLoc.lat, customerLoc.lng]
-        ]);
-
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16, animate: true });
+        // 🛑 التعديل: إذا كان موقع السائق متاحاً، اضبط حدود الخريطة لتشمل كلتا النقطتين.
+        if (driverLoc) {
+            const bounds = L.latLngBounds([
+                [driverLoc.lat, driverLoc.lng],
+                [customerLoc.lat, customerLoc.lng]
+            ]);
+            
+            // map.fitBounds سيقوم بالقفز وتحديد أفضل مستوى تكبير تلقائياً (طرابلس وبيروت)
+            // قمنا بإزالة maxZoom: 16 للسماح بتصغير الخريطة إذا لزم الأمر
+            map.fitBounds(bounds, { padding: [50, 50], animate: true }); 
+            
+        } else {
+            // إذا لم يكن السائق متوفراً، ركّز فقط على موقع العميل
+            map.setView([customerLoc.lat, customerLoc.lng], 15, { animate: true });
+        }
 
     }, [driverLoc, customerLoc, map]);
 
@@ -64,24 +92,63 @@ export default function CustomerTracking() {
     useEffect(() => {
         if (!orderId) return;
         const fetchInitialData = async () => {
-            try {
-                const res = await api.get(`/public/order/track/${orderId}`);
-                const data = res.data;
-                
-                if (data.customer && data.customer.lat) {
-                    setCustomerLocation({ lat: data.customer.lat, lng: data.customer.lng });
-                }
+        try {
+        const res = await api.get(`/public/order/track/${orderId}`);
+        const data = res.data;
 
-                if (data.tracked_location && data.tracked_location.lat) {
-                    setDriverLocation(data.tracked_location);
-                }
-                setStatus(`Order Status: ${data.status}`);
-            } catch (err) {
-                console.error("Error fetching order:", err);
-            }
+        const currentStatus = data.status ? data.status.toLowerCase() : 'unknown';
+
+        if (data.customer && data.customer.coords) {
+        setCustomerLocation({
+        lat: data.customer.coords.lat,
+        lng: data.customer.coords.lng
+        });
+        } else {
+        console.warn("Customer coordinates missing in initial data. Using Tripoli fallback coordinates.");
+
+        setCustomerLocation({
+         lat: 34.433,
+           lng: 35.833
+           });
+        }
+
+        if (currentStatus === 'in_transit' && data.tracked_location && data.tracked_location.lat) {
+        setDriverLocation(data.tracked_location);
+        } else {
+        setDriverLocation(null);
+        }
+
+        setStatus(`Order Status: ${data.status}`);
+        } catch (err) {
+        console.error("Error fetching order:", err);
+        setStatus("Error: Could not retrieve order data.");
+        }
         };
         fetchInitialData();
-    }, [orderId]);
+        }, [orderId]);
+
+
+    // useEffect(() => {
+    //     if (!orderId) return;
+    //     const fetchInitialData = async () => {
+    //         try {
+    //             const res = await api.get(`/public/order/track/${orderId}`);
+    //             const data = res.data;
+                
+    //             if (data.customer && data.customer.lat) {
+    //                 setCustomerLocation({ lat: data.customer.lat, lng: data.customer.lng });
+    //             }
+
+    //             if (data.tracked_location && data.tracked_location.lat) {
+    //                 setDriverLocation(data.tracked_location);
+    //             }
+    //             setStatus(`Order Status: ${data.status}`);
+    //         } catch (err) {
+    //             console.error("Error fetching order:", err);
+    //         }
+    //     };
+    //     fetchInitialData();
+    // }, [orderId]);
 
     useEffect(() => {
         if (!orderId) return;
@@ -95,9 +162,26 @@ export default function CustomerTracking() {
         });
 
         socket.on("location-updated", (data) => {
-            console.log("📍 New Driver Location:", data);
-            setDriverLocation({ lat: data.lat, lng: data.lng });
-        });
+        console.log("📍 New Driver Location:", data);
+        
+
+        if (data && (data.lat === null || data.lng === null)) {
+           console.log("🚗 Driver stopped tracking, removing icon.");
+             setDriverLocation(null);
+        }
+        // ✅ FIX: يجب التحقق من أن الكائن ليس فارغاً وأن الإحداثيات موجودة قبل محاولة استخدامها
+    //    else if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
+    //       setDriverLocation({ lat: data.lat, lng: data.lng });
+    //       } else {
+    //         console.warn("⚠️ Received invalid or incomplete location data, skipping state update.");
+    //    }
+
+    else if (data && typeof data.lat === 'number' && typeof data.lng === 'number') {
+        setDriverLocation({ lat: data.lat, lng: data.lng });
+      } else {
+        console.warn("⚠️ Received invalid or incomplete location data, skipping state update.");
+       }
+    });
 
         return () => socket.disconnect();
     }, [orderId]);
@@ -129,10 +213,13 @@ export default function CustomerTracking() {
                     )}
 
                     <MapContainer 
-                        center={customerLocation || [33.888, 35.495]} 
+                        center={customerLocation || [33.888, 35.495]}
                         zoom={13} 
                         style={{ height: "100%", width: "100%" }}
                     >
+
+                        {console.log("STATE Customer (Home Icon):", customerLocation)}
+                        {console.log("STATE Driver (Car Icon):", driverLocation)}
                         <TileLayer 
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
                             attribution="&copy; OpenStreetMap contributors"

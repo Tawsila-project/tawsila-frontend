@@ -10,8 +10,8 @@ import LogisticsStatsPage from "./pages/LogisticsStatsPage";
 import PlacesStatsPage from "./pages/PlacesStatsPage";
 import StaffPage from "./pages/staff/StaffPage";
 import OrdersPage from "./pages/staff/OrdersPage";
-import DriverTracking from "./components/staff/DriverTracking";
 import CustomerForm from "./components/CustomerForm";
+import StaffTrackingPage from "./pages/staff/StaffTrackingPage";
 import TrackingForm from "./components/TrackingForm";
 import TrackOrderMap from "./components/TrackOrderMap";
 import RateDelivery from "./components/RateDelivery";
@@ -62,7 +62,7 @@ function App() {
         >
           <Route path="staff" element={<StaffPage />} />
           <Route path="orders" element={<OrdersPage />} />
-          <Route path="tracking" element={<DriverTracking />} />
+          <Route path="tracking" element={<StaffTrackingPage />} />
         </Route>
 
       </Routes>

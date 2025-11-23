@@ -107,33 +107,64 @@ export default function CustomerForm() {
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
 
+const handleSubmit = async (e) => {
+e.preventDefault();
+if (!position) {
+alert("Please select your delivery location on the map!");
+return;
+}
+
+try {
+const res = await api.post("public/order/submit", {
+customer: {
+name: form.customer_name,
+phone: form.customer_phone,
+address: form.customer_address,
+coords: {
+lat: position.lat,
+lng: position.lng,
+},
+},
+type_of_item: form.type_of_item,
+tracked_location: { lat: position.lat, lng: position.lng },
+});
+
+const id = res.data.order.order_number;
+setOrderNumber(id);
+setOpen(true);
+
+} catch (err) {
+console.error("❌ Customer Form Submission Error:", err.response?.data?.error || err.message, err);
+alert(err.response?.data?.error || "Failed to submit order. Check Server Console.");
+}
+};
 
  
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!position) {
-      alert("Please select your delivery location on the map!");
-      return;
-    }
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!position) {
+  //     alert("Please select your delivery location on the map!");
+  //     return;
+  //   }
 
-    try {
-      const res = await api.post("public/order/submit", {
-        ...form,
-        tracked_location: { lat: position.lat, lng: position.lng },
-      });
+  //   try {
+  //     const res = await api.post("public/order/submit", {
+  //       ...form,
+  //       tracked_location: { lat: position.lat, lng: position.lng },
+  //     });
 
-      const id = res.data.order.order_number;
-      setOrderNumber(id);
-      setOpen(true);
+  //     const id = res.data.order.order_number;
+  //     setOrderNumber(id);
+  //     setOpen(true);
 
-      setForm({ customer_name: "", customer_phone: "", customer_address: "", type_of_item: "" });
-      setPosition(null);
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.error || "Failed to submit order");
-    }
-  };
+  //     setForm({ customer_name: "", customer_phone: "", customer_address: "", type_of_item: "" });
+  //     setPosition(null);
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert(err.response?.data?.error || "Failed to submit order");
+  //   }
+  // };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
