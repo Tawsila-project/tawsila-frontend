@@ -126,7 +126,7 @@ lng: position.lng,
 },
 },
 type_of_item: form.type_of_item,
-tracked_location: { lat: position.lat, lng: position.lng },
+// tracked_location: { lat: position.lat, lng: position.lng },
 });
 
 const id = res.data.order.order_number;
@@ -181,12 +181,8 @@ alert(err.response?.data?.error || "Failed to submit order. Check Server Console
 
           <Typography fontWeight={600} mt={2}>Select Delivery Location</Typography>
           <MapContainer
-            center={[34.4367, 35.8497]} zoom={15}
+            center={[33.888, 35.495]} zoom={10}
             style={{ height: "350px", marginBottom: "16px", borderRadius: "12px" }}
-            maxBounds={[
-              [34.42, 35.81], // SW
-              [34.46, 35.88], // NE
-            ]}
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
             <POILayer />

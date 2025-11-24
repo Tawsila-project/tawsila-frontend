@@ -155,7 +155,7 @@ alert(error.response?.data?.error || "Acceptance failed!");
         setCurrentPos([latitude, longitude]);
 
         if (socketRef.current?.connected) {
-          const currentOrderId = orderNumber || newOrder?.order_number;
+          // const currentOrderId = orderNumber || newOrder?.order_number;
 
           if (currentOrderId) {
             socketRef.current.emit("update-location", {
@@ -200,13 +200,6 @@ lng: null,
 };
 
 
-  // const stopTracking = () => {
-  //   navigator.geolocation.clearWatch(watchIdRef.current);
-  //   watchIdRef.current = null;
-
-  //   setIsTracking(false);
-  //   setStatusMsg("Tracking stopped.");
-  // };
 
   return (
     <Box
@@ -363,7 +356,7 @@ lng: null,
             return;
             }
 
-            const debugOrderId = orderNumber || newOrder?.order_number || "DEBUG_001";
+            const debugOrderId = currentOrderId || "DEBUG_001";
 
             const beirutLat = 33.888;
             const beirutLng = 35.495;

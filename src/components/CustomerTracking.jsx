@@ -24,23 +24,7 @@ const homeIcon = new L.Icon({
     popupAnchor: [0, -40]
 });
 
-// function MapController({ driverLoc, customerLoc }) {
-//     const map = useMap();
 
-//     useEffect(() => {
-//         if (!driverLoc || !customerLoc) return;
-
-//         const bounds = L.latLngBounds([
-//             [driverLoc.lat, driverLoc.lng],
-//             [customerLoc.lat, customerLoc.lng]
-//         ]);
-
-//         map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16, animate: true });
-
-//     }, [driverLoc, customerLoc, map]);
-
-//     return null;
-// }
 
 function MapController({ driverLoc, customerLoc }) {
     const map = useMap();
@@ -89,43 +73,56 @@ export default function CustomerTracking() {
         }
     }, [location.state]);
 
-    useEffect(() => {
-        if (!orderId) return;
-        const fetchInitialData = async () => {
+
+useEffect(() => {
+    if (!orderId) return;
+
+    const fetchInitialData = async () => {
         try {
-        const res = await api.get(`/public/order/track/${orderId}`);
-        const data = res.data;
+            const res = await api.get(`/public/order/track/${orderId}`);
+            const data = res.data;
 
-        const currentStatus = data.status ? data.status.toLowerCase() : 'unknown';
+            const currentStatus = data.status ? data.status.toLowerCase() : "unknown";
+            setStatus(`Order Status: ${data.status}`);
 
-        if (data.customer && data.customer.coords) {
-        setCustomerLocation({
-        lat: data.customer.coords.lat,
-        lng: data.customer.coords.lng
-        });
-        } else {
-        console.warn("Customer coordinates missing in initial data. Using Tripoli fallback coordinates.");
+            // ----------------------------------------------------
+            // 🟦 1. Set Customer Location (Tripoli fallback)
+            // ----------------------------------------------------
+            if (data.customer && data.customer.coords) {
+                setCustomerLocation({
+                    lat: data.customer.coords.lat,
+                    lng: data.customer.coords.lng,
+                });
+            } else {
+                console.warn("Customer coordinates missing. Using Tripoli fallback.");
+                setCustomerLocation({
+                    lat: 34.12,
+                    lng: 35.65,
+                });
+            }
 
-        setCustomerLocation({
-         lat: 34.433,
-           lng: 35.833
-           });
-        }
+            // ----------------------------------------------------
+            // 🟦 2. Set Driver Location (null if not in transit)
+            // ----------------------------------------------------
+            if (
+                currentStatus === "in_transit" &&
+                data.tracked_location &&
+                data.tracked_location.lat
+            ) {
+                setDriverLocation(data.tracked_location);
+            } else {
+                setDriverLocation(null);
+            }
 
-        if (currentStatus === 'in_transit' && data.tracked_location && data.tracked_location.lat) {
-        setDriverLocation(data.tracked_location);
-        } else {
-        setDriverLocation(null);
-        }
-
-        setStatus(`Order Status: ${data.status}`);
         } catch (err) {
-        console.error("Error fetching order:", err);
-        setStatus("Error: Could not retrieve order data.");
+            console.error("Error fetching order:", err);
+            setStatus("Error: Could not retrieve order data.");
         }
-        };
-        fetchInitialData();
-        }, [orderId]);
+    };
+
+    fetchInitialData();
+}, [orderId]);
+
 
 
     // useEffect(() => {
