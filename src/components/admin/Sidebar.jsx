@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   Drawer,
   List,
@@ -26,21 +26,27 @@ const drawerWidth = 240;
 
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+  };
 
   const menu = [
-    { name: "staffs", path: "/StaffElPage", icon: <People /> },
+    { name: "Staffs", path: "/StaffElPage", icon: <People /> },
     { name: "Orders", path: "/OrdersElPage", icon: <ShoppingCart /> },
     { name: "Logistics Stats", path: "/logistics-stats", icon: <BarChart /> },
     { name: "Places Stats", path: "/places-stats", icon: <Map /> },
   ];
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-
   const drawer = (
     <Box
       sx={{
         width: drawerWidth,
-        bgcolor: "#0ABE51", // primary green sidebar
+        bgcolor: "#0ABE51",
         color: "white",
         height: "100%",
         display: "flex",
@@ -51,7 +57,7 @@ export default function DashboardLayout() {
         Dashboard
       </Typography>
 
-      <List>
+      <List sx={{ flexGrow: 1 }}>
         {menu.map((item) => (
           <ListItem
             button
@@ -60,8 +66,8 @@ export default function DashboardLayout() {
             to={item.path}
             end
             sx={{
-              "&.active": { bgcolor: "#2CA9E3", color: "white" }, // active blue
-              "&:hover": { bgcolor: "#059a3b" }, // hover darker green
+              "&.active": { bgcolor: "#2CA9E3", color: "white" },
+              "&:hover": { bgcolor: "#059a3b" },
             }}
           >
             <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
@@ -70,15 +76,13 @@ export default function DashboardLayout() {
         ))}
       </List>
 
-      <Box sx={{ mt: "auto", p: 2 }}>
+      <Box sx={{ p: 2 }}>
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: "#F44336",
-            "&:hover": { backgroundColor: "#d32f2f" },
-          }}
           startIcon={<Logout />}
           fullWidth
+          sx={{ backgroundColor: "#F44336", "&:hover": { backgroundColor: "#d32f2f" } }}
+          onClick={handleLogout}
         >
           Logout
         </Button>
@@ -89,10 +93,7 @@ export default function DashboardLayout() {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       {/* Mobile AppBar */}
-      <AppBar
-        position="fixed"
-        sx={{ display: { md: "none" }, bgcolor: "#0ABE51" }} // same green as sidebar
-      >
+      <AppBar position="fixed" sx={{ display: { md: "none" }, bgcolor: "#0ABE51" }}>
         <Toolbar>
           <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2 }}>
             <MenuIcon />
@@ -103,9 +104,8 @@ export default function DashboardLayout() {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer */}
-      <Box component="nav">
-        {/* Mobile Drawer */}
+      {/* Sidebar */}
+      <Box component="nav" sx={{ flexShrink: { md: 0 } }}>
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -119,7 +119,6 @@ export default function DashboardLayout() {
           {drawer}
         </Drawer>
 
-        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           sx={{
@@ -139,13 +138,13 @@ export default function DashboardLayout() {
           flexGrow: 1,
           p: 3,
           width: { md: `calc(100% - ${drawerWidth}px)` },
-          mt: { xs: 7, md: 0 },
-          bgcolor: "#f3f4f6", // light background for main content
+          mt: { xs: 7, md: 0 }, // spacing for mobile AppBar
+          bgcolor: "#f3f4f6",
+          minHeight: "100vh",
+          overflowY: "auto",
         }}
       >
-        
         <Outlet />
-
       </Box>
     </Box>
   );

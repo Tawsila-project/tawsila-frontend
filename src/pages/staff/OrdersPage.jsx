@@ -40,7 +40,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <Box>
+    <Box p={{ xs: 2, sm: 7 }}>
       <Typography variant="h5" fontWeight="bold" mb={3}>
         Orders
       </Typography>
@@ -53,43 +53,46 @@ export default function OrdersPage() {
         sx={{ mb: 3 }}
       />
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Order ID</TableCell>
-              <TableCell>Customer Name</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>Assigned</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredOrders.map((order, idx) => (
-              <TableRow key={idx}>
-                <TableCell>{order.id}</TableCell>
-                <TableCell>{order.customer}</TableCell>
-                <TableCell>{order.phone}</TableCell>
-                <TableCell>{order.address}</TableCell>
-                <TableCell>{order.assigned}</TableCell>
-                <TableCell>
-                  <Chip label={order.status} color={statusColor[order.status]} size="small" />
-                </TableCell>
-                <TableCell>
-                  <Button size="small" sx={{ mr: 1 }} variant="outlined">
-                    Edit
-                  </Button>
-                  <Button size="small" variant="outlined" color="error">
-                    Delete
-                  </Button>
-                </TableCell>
+      {/* Responsive Table Wrapper */}
+      <Box sx={{ overflowX: "auto" }}>
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: { xs: 600, sm: "100%" } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order ID</TableCell>
+                <TableCell>Customer Name</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Address</TableCell>
+                <TableCell>Assigned</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {filteredOrders.map((order, idx) => (
+                <TableRow key={idx}>
+                  <TableCell>{order.id}</TableCell>
+                  <TableCell>{order.customer}</TableCell>
+                  <TableCell>{order.phone}</TableCell>
+                  <TableCell>{order.address}</TableCell>
+                  <TableCell>{order.assigned}</TableCell>
+                  <TableCell>
+                    <Chip label={order.status} color={statusColor[order.status]} size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Button size="small" sx={{ mr: 1, mb: { xs: 1, sm: 0 } }} variant="outlined">
+                      Edit
+                    </Button>
+                    <Button size="small" variant="outlined" color="error">
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Box>
   );
 }

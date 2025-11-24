@@ -19,7 +19,7 @@ export default function StaffPage() {
   );
 
   return (
-    <Box>
+    <Box p={{ xs: 2, sm: 7 }}>
       <Typography variant="h5" fontWeight="bold" mb={3}>Staff Members</Typography>
 
       <TextField
