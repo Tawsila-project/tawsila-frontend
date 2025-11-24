@@ -4,8 +4,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/admin/Sidebar";
 import StaffDashboardLayout from "./components/staff/StaffDashboardLayout";
 
-import StaffElPage from "./pages/StaffElPage";
-import OrdersElPage from "./pages/OrdersElPage";
+// import StaffElPage from "./pages/StaffElPage";
+// import OrdersElPage from "./pages/OrdersElPage";
 import LogisticsStatsPage from "./pages/LogisticsStatsPage";
 import PlacesStatsPage from "./pages/PlacesStatsPage";
 import StaffPage from "./pages/staff/StaffPage";
@@ -21,52 +21,118 @@ import Login from "./pages/Login";
 
 function App() {
   return (
+
     <BrowserRouter>
-      <Routes>
+  <Routes>
 
-        {/* PUBLIC CUSTOMER PAGES */}
-        <Route path="/" element={<CustomerForm />} />
-        {/* <Route path="/CustomerForm" element={<CustomerForm />} /> */}
-        <Route path="/TrackingForm" element={<TrackingForm />} />
-        <Route path="/TrackOrderMap" element={<TrackOrderMap />} />
-        <Route path="/RateDelivery" element={<RateDelivery />} />
-        <Route path="/WelcomeCustomer" element={<WelcomeCustomer />} />
+    {/* PUBLIC PAGES */}
+    <Route path="/" element={<CustomerForm />} />
+    <Route path="/TrackingForm" element={<TrackingForm />} />
+    <Route path="/TrackOrderMap" element={<TrackOrderMap />} />
+    <Route path="/RateDelivery" element={<RateDelivery />} />
+    <Route path="/WelcomeCustomer" element={<WelcomeCustomer />} />
+    <Route path="/login" element={<Login />} />
 
-        {/* AUTH PAGES FOR ADMIN + STAFF */}
-        <Route path="/login" element={<Login />} />
+    {/* ADMIN DASHBOARD */}
+    <Route
+      path="/admin"
+      element={
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <DashboardLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="logistics-stats" element={<LogisticsStatsPage />} />
+      <Route path="places-stats" element={<PlacesStatsPage />} />
+      <Route
+        path="staff"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <StaffPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="orders"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <OrdersPage />
+          </ProtectedRoute>
+        }
+      />
+    </Route>
 
-        {/* ADMIN DASHBOARD (protected) */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["admin"]}>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<StaffElPage />} />
-          <Route path="staff" element={<StaffElPage />} />
-          <Route path="orders" element={<OrdersElPage />} />
-          <Route path="logistics-stats" element={<LogisticsStatsPage />} />
-          <Route path="places-stats" element={<PlacesStatsPage />} />
-        </Route>
+    {/* STAFF DASHBOARD */}
+    <Route
+      path="/staff/dashboard"
+      element={
+        <ProtectedRoute allowedRoles={["staff"]}>
+          <StaffDashboardLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route path="staff" element={<StaffPage />} />
+      <Route path="orders" element={<OrdersPage />} />
+      <Route path="tracking" element={<StaffTrackingPage />} />
+    </Route>
 
-        {/* STAFF DASHBOARD (protected) */}
-        <Route
-          path="/staff/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["staff", "admin"]}>
-              <StaffDashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="staff" element={<StaffPage />} />
-          <Route path="orders" element={<OrdersPage />} />
-          <Route path="tracking" element={<StaffTrackingPage />} />
-        </Route>
+  </Routes>
+</BrowserRouter>
 
-      </Routes>
-    </BrowserRouter>
+    // <BrowserRouter>
+    //   <Routes>
+
+    //       <Route path="/" element={<CustomerForm />} />
+    //       <Route path="/TrackingForm" element={<TrackingForm />} />
+    //       <Route path="/TrackOrderMap" element={<TrackOrderMap />} />
+    //       <Route path="/RateDelivery" element={<RateDelivery />} />
+    //       <Route path="/WelcomeCustomer" element={<WelcomeCustomer />} />
+    //       <Route path="/login" element={<Login />} />
+    //       <Route path="logistics-stats" element={<LogisticsStatsPage />} />
+    //       <Route path="places-stats" element={<PlacesStatsPage />} />
+
+        
+
+
+    //     <Route
+    //       path="/admin"
+    //       element={
+    //         <ProtectedRoute allowedRoles={["admin"]}>
+    //           <DashboardLayout />
+    //         </ProtectedRoute>
+    //       }
+    //     >
+    //       <Route path="logistics-stats" element={<LogisticsStatsPage />} />
+    //       <Route path="places-stats" element={<PlacesStatsPage />} />
+
+    //       <Route path="staff" element={
+    //         <ProtectedRoute allowedRoles={["admin", "staff"]}>
+    //           <StaffPage />
+    //         </ProtectedRoute>
+    //       } />
+    //       <Route path="orders" element={
+    //         <ProtectedRoute allowedRoles={["admin", "staff"]}>
+    //           <OrdersPage />
+    //         </ProtectedRoute>
+    //       } />
+    //     </Route>
+
+    //     <Route
+    //       path="/staff/dashboard"
+    //       element={
+    //         <ProtectedRoute allowedRoles={["staff", "admin"]}>
+    //           <StaffDashboardLayout />
+    //         </ProtectedRoute>
+    //       }
+    //     >
+    //       <Route path="staff" element={<StaffPage />} />
+    //       <Route path="orders" element={<OrdersPage />} />
+    //       <Route path="tracking" element={<StaffTrackingPage />} />
+    //     </Route>
+
+
+    //   </Routes>
+    // </BrowserRouter>
   );
 }
 

@@ -21,15 +21,21 @@ localStorage.setItem("role", res.data.user.role);
 localStorage.setItem("driverId", res.data.user._id)
 console.log("Login successful. Role:", res.data.user.role);
 
+// if (res.data.user.role === "admin" || res.data.user.role === "staff") {
+// navigate("/staff/dashboard/orders");
+// }
+// else {
+// navigate("/");
+// }
+
 if (res.data.user.role === "admin") {
-navigate("/admin/dashboard");
+  navigate("/admin/logistics-stats");
+} else if (res.data.user.role === "staff") {
+  navigate("/staff/dashboard/orders");
+} else {
+  navigate("/");
 }
-else if (res.data.user.role === "staff") {
-navigate("/staff/dashboard/orders");
-}
-else {
-navigate("/");
-}
+
 
 } catch (err) {
 console.error("Login error:", err);

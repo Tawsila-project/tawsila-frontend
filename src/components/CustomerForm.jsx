@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Box, TextField, MenuItem, Button, Paper, Typography, Modal } from "@mui/material";
-import { MapContainer, TileLayer, Marker, useMap, Popup, LayerGroup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import { OpenStreetMapProvider, GeoSearchControl } from "leaflet-geosearch";
 import L from "leaflet";
 import api from "./api";
@@ -18,236 +18,372 @@ L.Icon.Default.mergeOptions({
 // Search control component
 function SearchControl({ setPosition, setForm }) {
   const map = useMap();
-
   useEffect(() => {
-    const provider = new OpenStreetMapProvider({
-      params: {
-        countrycodes: "LB",
-        limit: 5,
-        addressdetails: 1,
-      },
-    });
-
+    const provider = new OpenStreetMapProvider({ params: { countrycodes: "LB", limit: 5, addressdetails: 1 } });
     const searchControl = new GeoSearchControl({
       provider,
       style: "bar",
       showMarker: false,
-      retainZoomLevel: false,
       animateZoom: true,
       autoClose: true,
-      searchLabel: "Enter street or area in Tripoli...",
+      searchLabel: "Enter street or area...",
       keepResult: true,
     });
-
     map.addControl(searchControl);
-
     map.on("geosearch/showlocation", (result) => {
       const { x, y, label } = result.location;
       setPosition({ lat: y, lng: x });
       setForm((prev) => ({ ...prev, customer_address: label }));
     });
-
     return () => map.removeControl(searchControl);
   }, [map, setPosition, setForm]);
-
   return null;
 }
 
 // Draggable marker component
 function LocationSelector({ position, setPosition }) {
   const map = useMap();
-
   useEffect(() => {
     if (!position) return;
-
     const marker = L.marker(position, { draggable: true }).addTo(map);
     marker.bindPopup("Drag to exact location").openPopup();
-
-    marker.on("dragend", (e) => {
-      const newPos = e.target.getLatLng();
-      setPosition(newPos);
-    });
-
-    return () => {
-      marker.remove();
-    };
+    marker.on("dragend", (e) => setPosition(e.target.getLatLng()));
+    return () => marker.remove();
   }, [map, position, setPosition]);
-
   return null;
 }
 
-// Optional: Layer for POIs (buildings, landmarks)
+// Optional POI Layer
 function POILayer() {
   const map = useMap();
   useEffect(() => {
-    const poiLayer = L.tileLayer(
-      "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-      { attribution: '&copy; OpenStreetMap contributors' }
-    );
-    poiLayer.addTo(map);
-    return () => map.removeLayer(poiLayer);
+    const layer = L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", { attribution: '&copy; OpenStreetMap contributors' });
+    layer.addTo(map);
+    return () => map.removeLayer(layer);
   }, [map]);
   return null;
 }
 
 export default function CustomerForm() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    customer_name: "",
-    customer_phone: "",
-    customer_address: "",
-    type_of_item: "",
-  });
+  const [form, setForm] = useState({ customer_name: "", customer_phone: "", customer_address: "", type_of_item: "" });
   const [position, setPosition] = useState(null);
   const [orderNumber, setOrderNumber] = useState("");
   const [open, setOpen] = useState(false);
 
   const itemOptions = ["Electronics", "Clothes", "Food Delivery", "Documents", "Furniture", "Other"];
-
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-
-const handleSubmit = async (e) => {
-e.preventDefault();
-if (!position) {
-alert("Please select your delivery location on the map!");
-return;
-}
-
-try {
-const res = await api.post("public/order/submit", {
-customer: {
-name: form.customer_name,
-phone: form.customer_phone,
-address: form.customer_address,
-coords: {
-lat: position.lat,
-lng: position.lng,
-},
-},
-type_of_item: form.type_of_item,
-// tracked_location: { lat: position.lat, lng: position.lng },
-});
-
-const id = res.data.order.order_number;
-setOrderNumber(id);
-setOpen(true);
-
-} catch (err) {
-console.error("❌ Customer Form Submission Error:", err.response?.data?.error || err.message, err);
-alert(err.response?.data?.error || "Failed to submit order. Check Server Console.");
-}
-};
-
- 
-  
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   if (!position) {
-  //     alert("Please select your delivery location on the map!");
-  //     return;
-  //   }
-
-  //   try {
-  //     const res = await api.post("public/order/submit", {
-  //       ...form,
-  //       tracked_location: { lat: position.lat, lng: position.lng },
-  //     });
-
-  //     const id = res.data.order.order_number;
-  //     setOrderNumber(id);
-  //     setOpen(true);
-
-  //     setForm({ customer_name: "", customer_phone: "", customer_address: "", type_of_item: "" });
-  //     setPosition(null);
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert(err.response?.data?.error || "Failed to submit order");
-  //   }
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!position) return alert("Please select your delivery location on the map!");
+    try {
+      const res = await api.post("public/order/submit", {
+        customer: { name: form.customer_name, phone: form.customer_phone, address: form.customer_address, coords: { lat: position.lat, lng: position.lng } },
+        type_of_item: form.type_of_item,
+      });
+      setOrderNumber(res.data.order.order_number);
+      setOpen(true);
+    } catch (err) {
+      console.error("Customer Form Submission Error:", err);
+      alert(err.response?.data?.error || "Failed to submit order.");
+    }
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <Paper elevation={6} sx={{ padding: 3, maxWidth: 600, margin: "20px auto", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight={600} textAlign="center" mb={3}>Customer Delivery Request</Typography>
+      <Paper elevation={6} sx={{ p: { xs: 2, sm: 3 }, maxWidth: { xs: 340, sm: 500, md: 600 }, m: "16px auto", borderRadius: 3 }}>
+        <Typography variant="h5" fontWeight={600} textAlign="center" mb={3} sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>Customer Delivery Request</Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-          <TextField label="Full Name" name="customer_name" variant="outlined" fullWidth required value={form.customer_name} onChange={handleChange} />
-          <TextField label="Phone Number" name="customer_phone" type="tel" variant="outlined" fullWidth required value={form.customer_phone} onChange={handleChange} />
-          <TextField label="Address" name="customer_address" variant="outlined" fullWidth multiline rows={2} required value={form.customer_address} onChange={handleChange} />
-          <TextField select label="Type of Item" name="type_of_item" variant="outlined" fullWidth required value={form.type_of_item} onChange={handleChange}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
+          <TextField label="Full Name" name="customer_name" variant="outlined" fullWidth required value={form.customer_name} onChange={handleChange} size="small" />
+          <TextField label="Phone Number" name="customer_phone" type="tel" variant="outlined" fullWidth required value={form.customer_phone} onChange={handleChange} size="small" />
+          <TextField label="Address" name="customer_address" variant="outlined" fullWidth multiline rows={2} required value={form.customer_address} onChange={handleChange} size="small" />
+          <TextField select label="Type of Item" name="type_of_item" variant="outlined" fullWidth required value={form.type_of_item} onChange={handleChange} size="small">
             {itemOptions.map((item, idx) => <MenuItem key={idx} value={item}>{item}</MenuItem>)}
           </TextField>
 
-          <Typography fontWeight={600} mt={2}>Select Delivery Location</Typography>
-          <MapContainer
-            center={[33.888, 35.495]} zoom={10}
-            style={{ height: "350px", marginBottom: "16px", borderRadius: "12px" }}
-          >
+          <Typography fontWeight={600} mt={1} sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}>Select Delivery Location</Typography>
+          <MapContainer center={[33.888, 35.495]} zoom={10} style={{ height: { xs: "280px", sm: "320px" }, borderRadius: "12px", mb: 2 }}>
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
             <POILayer />
             <SearchControl setPosition={setPosition} setForm={setForm} />
             <LocationSelector position={position} setPosition={setPosition} />
           </MapContainer>
 
-          <Button variant="contained" color="primary" type="submit" sx={{ paddingY: 1.4, borderRadius: 2, fontSize: "1rem" }}>
-            Submit
-          </Button>
+          <Button variant="contained" color="primary" type="submit" sx={{ py: 1.2, borderRadius: 2, fontSize: { xs: "0.95rem", sm: "1rem" } }}>Submit</Button>
         </Box>
       </Paper>
 
-
-
       <Modal open={open} onClose={() => setOpen(false)}>
-  <Paper
-    sx={{
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      padding: 4,
-      maxWidth: 400,
-      textAlign: "center",
-      borderRadius: 2,
-    }}
-  >
-    <Typography variant="h6" mb={2}>
-      Order Submitted!
-    </Typography>
-    <Typography variant="body1" mb={2}>
-      Your order number is:
-    </Typography>
-    <Typography
-      variant="h5"
-      mb={3}
-      sx={{ fontWeight: "bold", wordBreak: "break-word" }}
-    >
-      {orderNumber}
-    </Typography>
-
-    {/* Button to go to tracking */}
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={() =>
-        navigate("/TrackingForm", { state: { orderNumber } })
-      }
-      sx={{ mr: 1 }}
-    >
-      Track My Order
-    </Button>
-
-    <Button
-      variant="outlined"
-      color="secondary"
-      onClick={() => setOpen(false)}
-    >
-      Close
-    </Button>
-  </Paper>
-</Modal>
-
+        <Paper sx={{
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+          p: { xs: 2, sm: 3 }, maxWidth: { xs: 300, sm: 400 }, textAlign: "center", borderRadius: 2
+        }}>
+          <Typography variant="h6" mb={1.5} sx={{ fontSize: { xs: "1rem", sm: "1.2rem" } }}>Order Submitted!</Typography>
+          <Typography variant="body2" mb={1}>Your order number is:</Typography>
+          <Typography variant="h5" mb={2} sx={{ fontWeight: "bold", wordBreak: "break-word", fontSize: { xs: "1.1rem", sm: "1.3rem" } }}>{orderNumber}</Typography>
+          <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1, justifyContent: "center" }}>
+            <Button variant="contained" color="primary" onClick={() => navigate("/TrackingForm", { state: { orderNumber } })} sx={{ flex: 1 }}>Track My Order</Button>
+            <Button variant="outlined" color="secondary" onClick={() => setOpen(false)} sx={{ flex: 1 }}>Close</Button>
+          </Box>
+        </Paper>
+      </Modal>
     </motion.div>
   );
 }
+
+
+// import { useState, useEffect } from "react";
+// import { motion } from "framer-motion";
+// import { useNavigate } from "react-router-dom";
+// import { Box, TextField, MenuItem, Button, Paper, Typography, Modal } from "@mui/material";
+// import { MapContainer, TileLayer, Marker, useMap, Popup, LayerGroup } from "react-leaflet";
+// import { OpenStreetMapProvider, GeoSearchControl } from "leaflet-geosearch";
+// import L from "leaflet";
+// import api from "./api";
+
+// // Fix default Leaflet marker icons
+// delete L.Icon.Default.prototype._getIconUrl;
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+//   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+//   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+// });
+
+// // Search control component
+// function SearchControl({ setPosition, setForm }) {
+//   const map = useMap();
+
+//   useEffect(() => {
+//     const provider = new OpenStreetMapProvider({
+//       params: {
+//         countrycodes: "LB",
+//         limit: 5,
+//         addressdetails: 1,
+//       },
+//     });
+
+//     const searchControl = new GeoSearchControl({
+//       provider,
+//       style: "bar",
+//       showMarker: false,
+//       retainZoomLevel: false,
+//       animateZoom: true,
+//       autoClose: true,
+//       searchLabel: "Enter street or area in Tripoli...",
+//       keepResult: true,
+//     });
+
+//     map.addControl(searchControl);
+
+//     map.on("geosearch/showlocation", (result) => {
+//       const { x, y, label } = result.location;
+//       setPosition({ lat: y, lng: x });
+//       setForm((prev) => ({ ...prev, customer_address: label }));
+//     });
+
+//     return () => map.removeControl(searchControl);
+//   }, [map, setPosition, setForm]);
+
+//   return null;
+// }
+
+// // Draggable marker component
+// function LocationSelector({ position, setPosition }) {
+//   const map = useMap();
+
+//   useEffect(() => {
+//     if (!position) return;
+
+//     const marker = L.marker(position, { draggable: true }).addTo(map);
+//     marker.bindPopup("Drag to exact location").openPopup();
+
+//     marker.on("dragend", (e) => {
+//       const newPos = e.target.getLatLng();
+//       setPosition(newPos);
+//     });
+
+//     return () => {
+//       marker.remove();
+//     };
+//   }, [map, position, setPosition]);
+
+//   return null;
+// }
+
+// // Optional: Layer for POIs (buildings, landmarks)
+// function POILayer() {
+//   const map = useMap();
+//   useEffect(() => {
+//     const poiLayer = L.tileLayer(
+//       "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+//       { attribution: '&copy; OpenStreetMap contributors' }
+//     );
+//     poiLayer.addTo(map);
+//     return () => map.removeLayer(poiLayer);
+//   }, [map]);
+//   return null;
+// }
+
+// export default function CustomerForm() {
+//   const navigate = useNavigate();
+//   const [form, setForm] = useState({
+//     customer_name: "",
+//     customer_phone: "",
+//     customer_address: "",
+//     type_of_item: "",
+//   });
+//   const [position, setPosition] = useState(null);
+//   const [orderNumber, setOrderNumber] = useState("");
+//   const [open, setOpen] = useState(false);
+
+//   const itemOptions = ["Electronics", "Clothes", "Food Delivery", "Documents", "Furniture", "Other"];
+
+//   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+
+// const handleSubmit = async (e) => {
+// e.preventDefault();
+// if (!position) {
+// alert("Please select your delivery location on the map!");
+// return;
+// }
+
+// try {
+// const res = await api.post("public/order/submit", {
+// customer: {
+// name: form.customer_name,
+// phone: form.customer_phone,
+// address: form.customer_address,
+// coords: {
+// lat: position.lat,
+// lng: position.lng,
+// },
+// },
+// type_of_item: form.type_of_item,
+// // tracked_location: { lat: position.lat, lng: position.lng },
+// });
+
+// const id = res.data.order.order_number;
+// setOrderNumber(id);
+// setOpen(true);
+
+// } catch (err) {
+// console.error("❌ Customer Form Submission Error:", err.response?.data?.error || err.message, err);
+// alert(err.response?.data?.error || "Failed to submit order. Check Server Console.");
+// }
+// };
+
+ 
+  
+//   // const handleSubmit = async (e) => {
+//   //   e.preventDefault();
+//   //   if (!position) {
+//   //     alert("Please select your delivery location on the map!");
+//   //     return;
+//   //   }
+
+//   //   try {
+//   //     const res = await api.post("public/order/submit", {
+//   //       ...form,
+//   //       tracked_location: { lat: position.lat, lng: position.lng },
+//   //     });
+
+//   //     const id = res.data.order.order_number;
+//   //     setOrderNumber(id);
+//   //     setOpen(true);
+
+//   //     setForm({ customer_name: "", customer_phone: "", customer_address: "", type_of_item: "" });
+//   //     setPosition(null);
+//   //   } catch (err) {
+//   //     console.error(err);
+//   //     alert(err.response?.data?.error || "Failed to submit order");
+//   //   }
+//   // };
+
+//   return (
+//     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+//       <Paper elevation={6} sx={{ padding: 3, maxWidth: 600, margin: "20px auto", borderRadius: 3 }}>
+//         <Typography variant="h5" fontWeight={600} textAlign="center" mb={3}>Customer Delivery Request</Typography>
+
+//         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+//           <TextField label="Full Name" name="customer_name" variant="outlined" fullWidth required value={form.customer_name} onChange={handleChange} />
+//           <TextField label="Phone Number" name="customer_phone" type="tel" variant="outlined" fullWidth required value={form.customer_phone} onChange={handleChange} />
+//           <TextField label="Address" name="customer_address" variant="outlined" fullWidth multiline rows={2} required value={form.customer_address} onChange={handleChange} />
+//           <TextField select label="Type of Item" name="type_of_item" variant="outlined" fullWidth required value={form.type_of_item} onChange={handleChange}>
+//             {itemOptions.map((item, idx) => <MenuItem key={idx} value={item}>{item}</MenuItem>)}
+//           </TextField>
+
+//           <Typography fontWeight={600} mt={2}>Select Delivery Location</Typography>
+//           <MapContainer
+//             center={[33.888, 35.495]} zoom={10}
+//             style={{ height: "350px", marginBottom: "16px", borderRadius: "12px" }}
+//           >
+//             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+//             <POILayer />
+//             <SearchControl setPosition={setPosition} setForm={setForm} />
+//             <LocationSelector position={position} setPosition={setPosition} />
+//           </MapContainer>
+
+//           <Button variant="contained" color="primary" type="submit" sx={{ paddingY: 1.4, borderRadius: 2, fontSize: "1rem" }}>
+//             Submit
+//           </Button>
+//         </Box>
+//       </Paper>
+
+
+
+//       <Modal open={open} onClose={() => setOpen(false)}>
+//   <Paper
+//     sx={{
+//       position: "absolute",
+//       top: "50%",
+//       left: "50%",
+//       transform: "translate(-50%, -50%)",
+//       padding: 4,
+//       maxWidth: 400,
+//       textAlign: "center",
+//       borderRadius: 2,
+//     }}
+//   >
+//     <Typography variant="h6" mb={2}>
+//       Order Submitted!
+//     </Typography>
+//     <Typography variant="body1" mb={2}>
+//       Your order number is:
+//     </Typography>
+//     <Typography
+//       variant="h5"
+//       mb={3}
+//       sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+//     >
+//       {orderNumber}
+//     </Typography>
+
+//     {/* Button to go to tracking */}
+//     <Button
+//       variant="contained"
+//       color="primary"
+//       onClick={() =>
+//         navigate("/TrackingForm", { state: { orderNumber } })
+//       }
+//       sx={{ mr: 1 }}
+//     >
+//       Track My Order
+//     </Button>
+
+//     <Button
+//       variant="outlined"
+//       color="secondary"
+//       onClick={() => setOpen(false)}
+//     >
+//       Close
+//     </Button>
+//   </Paper>
+// </Modal>
+
+//     </motion.div>
+//   );
+// }
 
