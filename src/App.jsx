@@ -6,8 +6,8 @@ import StaffDashboardLayout from "./components/staff/StaffDashboardLayout";
 
 // import StaffElPage from "./pages/StaffElPage";
 // import OrdersElPage from "./pages/OrdersElPage";
-import LogisticsStatsPage from "./pages/LogisticsStatsPage";
-import PlacesStatsPage from "./pages/PlacesStatsPage";
+import DriversLogs from "./pages/driversLogsPage";
+import PlacesLogs from "./pages/placeLogsPage";
 import StaffPage from "./pages/staff/StaffPage";
 import OrdersPage from "./pages/staff/OrdersPage";
 import CustomerForm from "./components/CustomerForm";
@@ -42,8 +42,8 @@ function App() {
         </ProtectedRoute>
       }
     >
-      <Route path="logistics-stats" element={<LogisticsStatsPage />} />
-      <Route path="places-stats" element={<PlacesStatsPage />} />
+      <Route path="driverLogs" element={<DriversLogs />} />
+      <Route path="placeLogs" element={<PlacesLogs />} />
       <Route
         path="staff"
         element={

@@ -5,6 +5,10 @@
 /* GeoSearch CSS */
 @import url('https://unpkg.com/leaflet-geosearch@3.1.0/dist/geosearch.css');
 
+/* optional dark/light scheme tweaks */
+:root {
+  color-scheme: light dark;
+}
 
 
 body {
@@ -76,6 +80,10 @@ h1 {
 }
 
 
+/* customer form  */
+
+
+
 /* The main search input */
 .leaflet-control-geosearch input {
   font-size: 0.9rem;        /* smaller text */
@@ -100,9 +108,30 @@ h1 {
 }
 
 
-/* optional dark/light scheme tweaks */
-:root {
-  color-scheme: light dark;
+
+
+
+
+.css-1qbc2pl {
+  padding: 8px !important;       /* smaller padding */
 }
 
-/* remove flex from body — Tailwind will handle layout */
+.css-ptc1iv{
+    height: 0 !important;
+  }
+
+@media (min-width: 600px) {
+  .css-1qbc2pl {
+    padding: 16px !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .css-1qbc2pl {
+    padding: 24px !important;
+  }
+
+  .css-ptc1iv{
+    max-height: 0 !important;
+  }
+}

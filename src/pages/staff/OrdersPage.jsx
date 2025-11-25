@@ -21,6 +21,8 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import api from "../../components/api";
 import dayjs from "dayjs";
+import Logo from "../../../public/Logo.png";
+
 
 export default function OrdersPage() {
   const [search, setSearch] = useState("");
@@ -28,10 +30,10 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [editStatus, setEditStatus] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState(null); // order to delete
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
-  const userRole = localStorage.getItem("role"); // "staff" or "admin"
+  const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     fetchOrders();
@@ -91,22 +93,32 @@ export default function OrdersPage() {
   );
 
   const statusColor = { received: "info", delivered: "success", in_transit: "warning" };
-  // const getCityFromAddress = (address) => {
-  //   if (!address) return "-";
-  //   const parts = address.split(",").map((p) => p.trim());
-  //   return parts[parts.length - 1];
-  // };
 
- const getCityFromAddress = (address) => {
-  if (!address) return "-";
-  const parts = address.trim().split(" "); // split by space
-  return parts[0]; // return the first word
-};
-
-
+  const getCityFromAddress = (address) => {
+    if (!address) return "-";
+    const parts = address.trim().split(" ");
+    return parts[0];
+  };
 
   return (
-    <Box p={{ xs: 2, sm: 7 }}>
+    <Box
+       sx={{
+        px: { xs: 1, sm: 2, md: 4 }, // horizontal padding responsive
+    py: { xs: 2, sm: 3 },        // vertical padding responsive
+    width: "100%",
+    boxSizing: "border-box",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",        // centers logo and heading
+    backgroundColor: "#f9f9f9",
+      }}
+    >
+
+        <img
+          src={Logo}
+          alt="Company Logo"
+          style={{ width: 110, height: "110" , display: "flex", marginLeft: "auto", marginRight: "auto", marginBottom: 16,}}
+        />
       <Typography variant="h5" fontWeight="bold" mb={3}>
         Orders
       </Typography>
@@ -124,39 +136,38 @@ export default function OrdersPage() {
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: { xs: 700, sm: "100%" } }}>
+        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+          <Table sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
-                <TableCell>Id</TableCell>
-                <TableCell>Customer Name</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Place</TableCell>
-                <TableCell>Type of Item</TableCell>
-                <TableCell>Assigned Staff</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Created At</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Id</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Customer Name</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Phone</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Place</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Type of Item</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Assigned Staff</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Status</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Created At</TableCell>
+                <TableCell sx={{ py: 1, px: 1 }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredOrders.map((order) => (
                 <TableRow key={order._id}>
-                  <TableCell>{order.order_number.slice(-6)}</TableCell>
-                  <TableCell>{order.customer.name}</TableCell>
-                  <TableCell>{order.customer.phone}</TableCell>
-                  <TableCell>{getCityFromAddress(order.customer.address)}</TableCell>
-                  <TableCell>{order.type_of_item || "-"}</TableCell>
-                  <TableCell>{order.assigned_staff_id?.username || "Unassigned"}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{order.order_number.slice(-6)}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{order.customer.name}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{order.customer.phone}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{getCityFromAddress(order.customer.address)}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{order.type_of_item || "-"}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{order.assigned_staff_id?.username || "Unassigned"}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>
                     <Chip label={order.status} color={statusColor[order.status]} size="small" />
                   </TableCell>
-                  <TableCell>{dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}</TableCell>
-                  <TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>{dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}</TableCell>
+                  <TableCell sx={{ py: 1, px: 1 }}>
                     <IconButton color="primary" onClick={() => handleEdit(order)}>
                       <Edit />
                     </IconButton>
-
                     {userRole === "admin" && (
                       <IconButton color="error" onClick={() => setDeleteConfirm(order)}>
                         <Delete />
@@ -167,7 +178,7 @@ export default function OrdersPage() {
               ))}
               {filteredOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} align="center">
+                  <TableCell colSpan={9} align="center" sx={{ py: 2 }}>
                     No orders found
                   </TableCell>
                 </TableRow>
@@ -185,9 +196,9 @@ export default function OrdersPage() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 300,
+            width: { xs: "95%", sm: 300 },
             bgcolor: "background.paper",
-            p: 4,
+            p: { xs: 2, sm: 4 },
             borderRadius: 2,
           }}
         >
@@ -226,9 +237,9 @@ export default function OrdersPage() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 350,
+            width: { xs: "90%", sm: 350 },
             bgcolor: "background.paper",
-            p: 4,
+            p: { xs: 2, sm: 4 },
             borderRadius: 2,
             textAlign: "center",
           }}

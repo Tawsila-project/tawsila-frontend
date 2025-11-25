@@ -35,8 +35,8 @@ export default function DashboardLayout() {
     ? [
         { name: "Staff Management", path: "/admin/staff", icon: <People /> },
         { name: "Orders Control", path: "/admin/orders", icon: <ShoppingCart /> },
-        { name: "Logistics Stats", path: "/admin/logistics-stats", icon: <BarChart /> },
-        { name: "Places Stats", path: "/admin/places-stats", icon: <Map /> },
+        { name: "Drivers logs", path: "/admin/driverLogs", icon: <BarChart /> },
+        { name: "Places logs", path: "/admin/placeLogs", icon: <Map /> },
       ]
     : [
         { name: "Orders Control", path: "/staff/dashboard/orders", icon: <ShoppingCart /> },

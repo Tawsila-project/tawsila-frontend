@@ -2,6 +2,7 @@
 import React from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
+import Logo from "../../public/Logo.png";
 
 // Sample data
 const data = [
@@ -17,7 +18,13 @@ const COLORS = ["#0ABE51", "#2CA9E3", "#FACC15", "#F44336"];
 export default function LogisticsStatsPage() {
   return (
     <Box>
-      <Typography variant="h5" fontWeight="bold" mb={3}>
+
+      <img
+          src={Logo}
+          alt="Company Logo"
+          style={{ width: 110, height: "110" , display: "flex", marginLeft: "auto", marginRight: "auto"}}
+        />
+       <Typography variant="h5" fontWeight="bold" mt={3} mb={3} display={"flex"} align="center" justifyContent={"center"}>
         Logistics Statistics
       </Typography>
 

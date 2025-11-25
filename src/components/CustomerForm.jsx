@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import { OpenStreetMapProvider, GeoSearchControl } from "leaflet-geosearch";
 import L from "leaflet";
 import api from "./api";
+import Logo from "../../public/logo.png";
 
 // Fix default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -91,10 +92,17 @@ export default function CustomerForm() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <Paper elevation={6} sx={{ p: { xs: 2, sm: 3 }, maxWidth: { xs: 340, sm: 500, md: 600 }, m: "16px auto", borderRadius: 3 }}>
-        <Typography variant="h5" fontWeight={600} textAlign="center" mb={3} sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>Customer Delivery Request</Typography>
 
+ 
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      <Paper elevation={6} sx={{ p: {  xs: 2, sm: 2 }, maxWidth: {  xs: 340, sm: 380, md: 420 }, m: "16px auto", borderRadius: 3 }}>
+          <img
+            src={Logo}
+            alt="Company Logo"
+            style={{ width: 90, height: "90" , display: "flex", marginLeft: "auto", marginRight: "auto", marginBottom: 10 , borderRadius: "50%"}}
+          />
+        <Typography variant="h5" fontWeight={600} textAlign="center" mb={3} sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>Customer Delivery Request</Typography>
+  
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
           <TextField label="Full Name" name="customer_name" variant="outlined" fullWidth required value={form.customer_name} onChange={handleChange} size="small" />
           <TextField label="Phone Number" name="customer_phone" type="tel" variant="outlined" fullWidth required value={form.customer_phone} onChange={handleChange} size="small" />
@@ -104,7 +112,7 @@ export default function CustomerForm() {
           </TextField>
 
           <Typography fontWeight={600} mt={1} sx={{ fontSize: { xs: "0.9rem", sm: "1rem" } }}>Select Delivery Location</Typography>
-          <MapContainer center={[33.888, 35.495]} zoom={10} style={{ height: { xs: "280px", sm: "320px" }, borderRadius: "12px", mb: 2 }}>
+          <MapContainer center={[33.888, 35.495]} zoom={10} style={{ height: { xs: "280px", sm: "320px" }, borderRadius: "12px", mb: 2 }} >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
             <POILayer />
             <SearchControl setPosition={setPosition} setForm={setForm} />

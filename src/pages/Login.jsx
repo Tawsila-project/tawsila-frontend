@@ -29,7 +29,7 @@ console.log("Login successful. Role:", res.data.user.role);
 // }
 
 if (res.data.user.role === "admin") {
-  navigate("/admin/logistics-stats");
+  navigate("/admin/driverLogs");
 } else if (res.data.user.role === "staff") {
   navigate("/staff/dashboard/orders");
 } else {
