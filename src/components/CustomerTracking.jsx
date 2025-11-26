@@ -211,10 +211,10 @@ export default function CustomerTracking() {
                     {(driverLocation && eta && distance) && (
                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                             <Typography variant="body1" fontWeight="600" color="primary.main" sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
-                                ⏱️ الوقت المقدر: {eta}
+                                 Estimated Time ⏱️ : {eta}
                             </Typography>
                             <Typography variant="body1" fontWeight="600" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
-                                📏 المسافة المتبقية: {distance}
+                             Remaining Distance 📏 : {distance}
                             </Typography>
                         </Box>
                     )}
