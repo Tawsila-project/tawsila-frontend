@@ -33,6 +33,10 @@ export default function StaffPage() {
 
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
+  const userId = localStorage.getItem("userId");
+
+  console.log("Current User ID:", userId);
+
 
   // Fetch Staff
   const fetchStaff = async () => {
@@ -68,21 +72,61 @@ export default function StaffPage() {
   };
 
   // Toggle Availability
-  const handleToggleAvailability = async (staff) => {
-    try {
-      const res = await api.put(
-        `/users/${staff._id}`,
-        { availability: !staff.availability },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setStaffList((prev) =>
-        prev.map((s) => (s._id === staff._id ? { ...s, availability: res.data.availability } : s))
-      );
-      setSuccessMsg(`Availability updated to ${res.data.availability ? "Available" : "Offline"}`);
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to update availability");
+
+const handleToggleAvailability = async (staff) => {
+  try {
+    let url;
+    let payload = { availability: !staff.availability };
+
+    if (role === "staff" && staff._id === userId) {
+      url = `/users/${staff._id}/availability`; // staff route
+    } else if (role === "admin") {
+      url = `/users/${staff._id}`; // admin route
+    } else {
+      setError("You cannot update this staff");
+      return;
     }
-  };
+
+    const res = await api.put(url, payload,{
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    setStaffList((prev) =>
+      prev.map((s) =>
+        s._id === staff._id ? { ...s, availability: res.data.availability } : s
+      )
+    );
+
+    setSuccessMsg(
+      `Availability updated to ${res.data.availability ? "Available" : "Offline"}`
+    );
+
+  } catch (err) {
+    setError(err.response?.data?.error || "Failed to update availability");
+  }
+};
+
+
+  // const handleToggleAvailability = async (staff) => {
+  //   try {
+  //     const res = await api.put(
+  //       `/users/availability/${staff._id}`,
+  //       { availability: !staff.availability },
+  //       { headers: { Authorization: `Bearer ${token}` } }
+  //     );
+  //     setStaffList((prev) =>
+  //       prev.map((s) => (s._id === staff._id ? { ...s, availability: res.data.availability } : s))
+  //     );
+  //     setSuccessMsg(`Availability updated to ${res.data.availability ? "Available" : "Offline"}`);
+
+  //     if (res.data._id.toString() === userId) {
+  //       localStorage.setItem("userId", res.data._id);
+  //     }
+
+  //   } catch (err) {
+  //     setError(err.response?.data?.error || "Failed to update availability");
+  //   }
+  // };
 
   // Create Staff
   const handleCreateStaff = async (newStaff) => {
@@ -110,6 +154,12 @@ export default function StaffPage() {
       );
       setSuccessMsg("Staff updated successfully");
       setEditingStaff(null);
+
+      // ✅ إذا تم تعديل المستخدم الحالي (logged-in staff) حدث localStorage
+      if (res.data._id === userId) {
+        localStorage.setItem("userId", res.data._id);
+        localStorage.setItem("role", res.data.role); // إذا تغير الدور لأي سبب
+      }
     } catch (err) {
       setError(err.response?.data?.error || "Failed to update staff");
     }
@@ -207,13 +257,23 @@ export default function StaffPage() {
         alt="Company Logo"
         style={{ width: 110, height: "110" , display: "flex", marginLeft: "auto", marginRight: "auto"}}
       />
-      <Typography variant="h5" fontWeight="bold" mt={3} mb={3} display={"flex"} align="center" justifyContent={"center"}>
+      <Typography variant="h5" color="black" fontWeight="bold" mt={3} mb={3} display={"flex"} align="center" justifyContent={"center"}>
         Staff Members
       </Typography>
 
-      <Button variant="contained" onClick={() => setOpenCreate(true)} sx={{ mb: 2 }}>
+
+     {role === "admin" &&
+      <Button variant="contained" 
+      onClick={() => setOpenCreate(true)}  sx={{
+      mb: 2,
+      backgroundColor: "#2CA9E3",   // set your blue color
+      color: "white",               // text color
+      "&:hover": { backgroundColor: "#2790c7" }, // slightly darker on hover
+    }}>
         Create New Staff
       </Button>
+      }
+       
 
       <TextField
         label="Search Staff"
@@ -229,7 +289,7 @@ export default function StaffPage() {
         </Box>
       ) : (
         <Box sx={{ overflowX: "auto" }} p={0} >
-          <TableContainer component={Paper} maxWidth={false}  sx={{ padding: "0" }} px={0}>
+          <TableContainer component={Paper}   sx={{ padding: "0", maxWidth: "100%" }} >
             <Table >
               <TableHead>
                 <TableRow>
@@ -251,13 +311,39 @@ export default function StaffPage() {
                       </Tooltip>
                     </TableCell>
                     <TableCell>
-                      <Chip
+                      {/* <Chip
                         label={staff.availability ? "Available" : "Offline"}
                         color={staff.availability ? "success" : "default"}
                         size="small"
                         onClick={() => role === "staff" && handleToggleAvailability(staff)}
                         sx={{ cursor: role === "staff" ? "pointer" : "default" }}
-                      />
+                      /> */}
+
+                    
+                      <Button
+                        size="small"
+                        variant={staff.availability ? "contained" : "outlined"}
+                        color={staff.availability ? "success" : "secondary"}
+                
+                         onClick={() => {
+                          if (role === "staff" && staff._id === userId) {
+                            handleToggleAvailability(staff);
+                          } else if (role === "admin") {
+                            handleToggleAvailability(staff);
+                          }
+                        }}
+                        
+                        
+                        sx={{
+                          cursor: role === "admin" || (role === "staff" && staff._id === userId) ? "pointer" : "not-allowed",
+                          minWidth: 90,
+                        }}
+                      >
+                        {staff.availability ? "Available" : "Offline"}
+                      </Button>
+                  
+
+
                     </TableCell>
                     {role === "admin" && (
                       <TableCell>

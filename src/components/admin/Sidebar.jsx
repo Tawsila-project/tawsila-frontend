@@ -43,53 +43,127 @@ export default function DashboardLayout() {
         { name: "Live Tracking", path: "/staff/dashboard/tracking", icon: <Map /> },
       ];
 
+  // const drawer = (
+  //   <Box
+  //     sx={{
+  //       width: drawerWidth,
+  //       bgcolor: "#0ABE51",
+  //       color: "white",
+  //       height: "100%",
+  //       display: "flex",
+  //       flexDirection: "column",
+  //     }}
+  //   >
+  //     <Typography variant="h6" sx={{ m: 2, fontWeight: 600 }}>
+  //       {role === "admin" ? "Admin Dashboard" : "Staff Panel"}
+  //     </Typography>
+
+  //     <List sx={{ flexGrow: 1 }}>
+  //       {menu.map((item) => (
+  //         <ListItem
+  //           key={item.name}
+  //           component={NavLink}
+  //           to={item.path}
+  //           end
+  //           sx={{
+  //             "&.active": { bgcolor: "#2CA9E3", color: "white" },
+  //             "&:hover": { bgcolor: "#059a3b" },
+  //           }}
+  //         >
+  //           <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
+  //           <ListItemText primary={item.name} />
+  //         </ListItem>
+
+  //       ))}
+  //     </List>
+
+  //     <Box sx={{ p: 2 }}>
+  //       <Button
+  //         variant="contained"
+  //         startIcon={<Logout />}
+  //         fullWidth
+  //         sx={{ backgroundColor: "#F44336", "&:hover": { backgroundColor: "#d32f2f" } }}
+  //         onClick={handleLogout}
+  //       >
+  //         Logout
+  //       </Button>
+  //     </Box>
+  //   </Box>
+  // );
+
+
   const drawer = (
-    <Box
+  <Box
+    sx={{
+      width: drawerWidth,
+      bgcolor: "#0ABE51", // main green
+      color: "white",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      borderRight: "2px solid #2CA9E3", // subtle blue accent
+    }}
+  >
+    <Typography
+      variant="h6"
       sx={{
-        width: drawerWidth,
-        bgcolor: "#0ABE51",
-        color: "white",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
+        m: 2,
+        fontWeight: 700,
+        letterSpacing: 1,
+        textTransform: "uppercase",
+        color: "#ffffff",
       }}
     >
-      <Typography variant="h6" sx={{ m: 2, fontWeight: 600 }}>
-        {role === "admin" ? "Admin Dashboard" : "Staff Panel"}
-      </Typography>
+      {role === "admin" ? "Admin Dashboard" : "Staff Panel"}
+    </Typography>
 
-      <List sx={{ flexGrow: 1 }}>
-        {menu.map((item) => (
-          <ListItem
-            button
-            key={item.name}
-            component={NavLink}
-            to={item.path}
-            end
-            sx={{
-              "&.active": { bgcolor: "#2CA9E3", color: "white" },
-              "&:hover": { bgcolor: "#059a3b" },
-            }}
-          >
-            <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.name} />
-          </ListItem>
-        ))}
-      </List>
-
-      <Box sx={{ p: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<Logout />}
-          fullWidth
-          sx={{ backgroundColor: "#F44336", "&:hover": { backgroundColor: "#d32f2f" } }}
-          onClick={handleLogout}
+    <List sx={{ flexGrow: 1 }}>
+      {menu.map((item) => (
+        <ListItem
+          key={item.name}
+          component={NavLink}
+          to={item.path}
+          end
+          sx={{
+            borderRadius: 1,
+            mb: 1,
+            mx: 1,
+            color: "white",
+            "&.active": {
+              bgcolor: "#2CA9E3", // active blue
+              color: "white",
+              boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+            },
+            "&:hover": {
+              bgcolor: "rgba(255,255,255,0.1)",
+              color: "white",
+            },
+            transition: "all 0.3s ease",
+          }}
         >
-          Logout
-        </Button>
-      </Box>
+          <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
+          <ListItemText primary={item.name} />
+        </ListItem>
+      ))}
+    </List>
+
+    <Box sx={{ p: 2 }}>
+      <Button
+        variant="contained"
+        startIcon={<Logout />}
+        fullWidth
+        sx={{
+          backgroundColor: "#F44336",
+          "&:hover": { backgroundColor: "#d32f2f" },
+          fontWeight: 600,
+        }}
+        onClick={handleLogout}
+      >
+        Logout
+      </Button>
     </Box>
-  );
+  </Box>
+);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>

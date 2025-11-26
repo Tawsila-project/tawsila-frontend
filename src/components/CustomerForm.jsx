@@ -162,7 +162,7 @@ export default function CustomerForm() {
                         <LocationSelector position={position} setPosition={setPosition} />
                     </MapContainer>
 
-                    <Button variant="contained" color="primary" type="submit" sx={{ paddingY: 1.4, borderRadius: 2, fontSize: "1rem" }}>
+                    <Button variant="contained"  color="primary" type="submit" sx={{ paddingY: 1.4, borderRadius: 2, fontSize: "1rem" }}>
                         Submit
                     </Button>
                 </Box>

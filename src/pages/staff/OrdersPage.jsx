@@ -119,7 +119,7 @@ export default function OrdersPage() {
           alt="Company Logo"
           style={{ width: 110, height: "110" , display: "flex", marginLeft: "auto", marginRight: "auto", marginBottom: 16,}}
         />
-      <Typography variant="h5" fontWeight="bold" mb={3}>
+      <Typography variant="h5" color="black" fontWeight="bold" mb={3}>
         Orders
       </Typography>
 

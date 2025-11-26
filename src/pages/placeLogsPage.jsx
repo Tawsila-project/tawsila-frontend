@@ -1,33 +1,55 @@
-// src/pages/PlacesStatsPage.jsx
-import React from "react";
-import { Box, Typography, Paper } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Paper, MenuItem, TextField } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import api from "../../src/components/api";
 import Logo from "../../public/Logo.png";
 
-// Sample data for places
-const data = [
-  { city: "dam w farez", deliveries: 45 },
-  { city: "Beirut", deliveries: 30 },
-  { city: "Mina", deliveries: 25 },
-  { city: "Jubeil", deliveries: 15 },
-  { city: "Down town", deliveries: 20 },
-];
-
-// Brand colors
 const COLORS = ["#0ABE51", "#2CA9E3", "#0ABE51", "#2CA9E3", "#0ABE51"];
 
 export default function PlacesStatsPage() {
+  const [range, setRange] = useState("weekly");
+  const [data, setData] = useState([]);
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get(`/orders/places?range=${range}`);
+      setData(res.data);
+    } catch (err) {
+      console.error("Error loading stats:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, [range]);
+
   return (
     <Box>
 
       <img
-          src={Logo}
-          alt="Company Logo"
-          style={{ width: 110, height: "110" , display: "flex", marginLeft: "auto", marginRight: "auto"}}
-        />
-       <Typography variant="h5" fontWeight="bold" mt={3} mb={3} display={"flex"} align="center" justifyContent={"center"}>
+        src={Logo}
+        alt="Company Logo"
+        style={{ width: 110, height: 110, display: "flex", marginLeft: "auto", marginRight: "auto" }}
+      />
+
+      <Typography variant="h5" color="black" fontWeight="bold" mt={3} mb={3} display={"flex"} justifyContent={"center"}>
         Places Statistics
       </Typography>
+
+      {/* 🔥 Filter */}
+      <Box display="flex" justifyContent="center" mb={2}>
+        <TextField
+          select
+          label="Filter By"
+          value={range}
+          onChange={(e) => setRange(e.target.value)}
+          sx={{ width: 200 }}
+        >
+          <MenuItem value="daily">Daily</MenuItem>
+          <MenuItem value="weekly">Weekly</MenuItem>
+          <MenuItem value="monthly">Monthly</MenuItem>
+        </TextField>
+      </Box>
 
       <Paper sx={{ p: 3, overflowX: "auto" }}>
         <Box sx={{ width: "100%", height: { xs: 300, sm: 400 } }}>
@@ -40,7 +62,7 @@ export default function PlacesStatsPage() {
               <Legend verticalAlign="bottom" height={36} />
               <Bar dataKey="deliveries" name="Deliveries">
                 {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Bar>
             </BarChart>

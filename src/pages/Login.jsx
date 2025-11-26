@@ -13,70 +13,90 @@ setForm({ ...form, [e.target.name]: e.target.value });
 };
 
 const handleLogin = async () => {
-try {
-const res = await api.post("/users/login", form);
+  try {
+    const res = await api.post("/users/login", form);
 
-localStorage.setItem("token", res.data.token);
-localStorage.setItem("role", res.data.user.role);
-localStorage.setItem("driverId", res.data.user._id)
-console.log("Login successful. Role:", res.data.user.role);
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("role", res.data.user.role);
+    localStorage.setItem("userId", res.data.user._id);
 
-// if (res.data.user.role === "admin" || res.data.user.role === "staff") {
-// navigate("/staff/dashboard/orders");
-// }
-// else {
-// navigate("/");
-// }
+    console.log("Login successful. Role:", res.data.user.role);
 
-if (res.data.user.role === "admin") {
-  navigate("/admin/driverLogs");
-} else if (res.data.user.role === "staff") {
-  navigate("/staff/dashboard/orders");
-} else {
-  navigate("/");
-}
-
-
-} catch (err) {
-console.error("Login error:", err);
-alert(err.response?.data?.error || "Login failed. Check server connection.");
-}
+    if (res.data.user.role === "admin") {
+      navigate("/admin/driverLogs");
+    } else if (res.data.user.role === "staff") {
+      navigate("/staff/dashboard/orders");
+    } else {
+      navigate("/");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    alert(err.response?.data?.error || "Login failed. Check server connection.");
+  }
 };
+
+
+// const handleLogin = async () => {
+// try {
+// const res = await api.post("/users/login", form);
+
+// localStorage.setItem("token", res.data.token);
+// localStorage.setItem("role", res.data.user.role);
+// localStorage.setItem("driverId", res.data.user._id)
+
+// console.log("Login successful. Role:", res.data.user.role);
+
+
+
+// if (res.data.user.role === "admin") {
+//   navigate("/admin/driverLogs");
+// } else if (res.data.user.role === "staff") {
+//   navigate("/staff/dashboard/orders");
+// } else {
+//   navigate("/");
+// }
+
+
+// } catch (err) {
+// console.error("Login error:", err);
+// alert(err.response?.data?.error || "Login failed. Check server connection.");
+// }
+// };
 
 return (
 <AuthLayout>
-<Typography variant="h5" fontWeight="bold" textAlign="center" mb={3} color="#0ABE51">
-🔑 Staff Login
-</Typography>
+    <Typography variant="h5" fontWeight="bold" textAlign="center" mb={3} color="#0ABE51">
+    Login
+    </Typography>
 
-<TextField
-fullWidth
-label="Username"
-name="username"
-margin="normal"
-onChange={handleChange}
-/>
+  <TextField
+      fullWidth
+      label="Username"
+      name="username"
+      margin="normal"
+      onChange={handleChange}
+  />
 
-<TextField
-fullWidth
-label="Password"
-type="password"
-name="password"
-margin="normal"
-onChange={handleChange}
-/>
+    <TextField
+      fullWidth
+      label="Password"
+      type="password"
+      name="password"
+      margin="normal"
+      onChange={handleChange}
+    />
 
-<Button
-fullWidth
-variant="contained"
-sx={{ mt: 3, bgcolor: "#0ABE51", py: 1.5, fontSize: "1.1rem" }}
-onClick={handleLogin}
->
-Login
-</Button>
-</AuthLayout>
-);
-}
+    <Button
+        fullWidth
+        variant="contained"
+        sx={{ mt: 3, bgcolor: "#0ABE51", py: 1.5, fontSize: "1.1rem" }}
+        onClick={handleLogin}
+        >
+        Login
+    </Button>
+    </AuthLayout>
+    );
+    }
 
 
 
