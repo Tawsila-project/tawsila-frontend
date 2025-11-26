@@ -27,13 +27,40 @@ const homeIcon = new L.Icon({
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// function MapController({ driverLoc, customerLoc }) {
+//     const map = useMap();
+
+//     useEffect(() => {
+//         if (!customerLoc) return;
+//         if (driverLoc) map.fitBounds([[driverLoc.lat, driverLoc.lng], [customerLoc.lat, customerLoc.lng]], { padding: [40, 40], animate: true });
+//         else map.setView([customerLoc.lat, customerLoc.lng], 14, { animate: true });
+//     }, [driverLoc, customerLoc, map]);
+//     return null;
+// }
+
 function MapController({ driverLoc, customerLoc }) {
     const map = useMap();
+
     useEffect(() => {
-        if (!customerLoc) return;
-        if (driverLoc) map.fitBounds([[driverLoc.lat, driverLoc.lng], [customerLoc.lat, customerLoc.lng]], { padding: [40, 40], animate: true });
-        else map.setView([customerLoc.lat, customerLoc.lng], 14, { animate: true });
+        // 1. تحديد النقاط التي يجب أن تركز عليها الخريطة
+        const points = [];
+        if (driverLoc) points.push([driverLoc.lat, driverLoc.lng]);
+        if (customerLoc) points.push([customerLoc.lat, customerLoc.lng]);
+
+        // 2. إذا كانت هناك نقطتان (السائق والعميل)، قم بتحديد حدودهما (Fit Bounds)
+        if (points.length === 2) {
+            // استخدام fitBounds لاحتواء النقطتين في العرض (مثل طرابلس)
+            map.fitBounds(points, { padding: [40, 40], animate: true });
+        }
+        // 3. إذا كانت هناك نقطة واحدة فقط (العميل في انتظار السائق)، قم بالتكبير على موقع العميل
+        else if (customerLoc) {
+            // تعيين عرض الخريطة على موقع العميل بتكبير جيد (مثل 14)
+            map.setView([customerLoc.lat, customerLoc.lng], 14, { animate: true });
+        }
+        // 4. إذا لم يكن هناك شيء، لن تفعل الدالة شيئًا وستبقى الخريطة على المركز الأولي (لبنان)
+
     }, [driverLoc, customerLoc, map]);
+    
     return null;
 }
 
@@ -44,6 +71,9 @@ export default function CustomerTracking() {
     const [driverLocation, setDriverLocation] = useState(null);
     const [customerLocation, setCustomerLocation] = useState(null);
     const [status, setStatus] = useState("Connecting...");
+    const [eta, setEta] = useState(null);
+    const [distance, setDistance] = useState(null);
+
     const socketRef = useRef(null);
 
     // 🆕 حالة النافذة المنبثقة للتسليم
@@ -85,6 +115,56 @@ export default function CustomerTracking() {
         return () => socket.disconnect();
     }, [orderId]);
 
+
+    // 🆕 تأثير جديد لحساب المسافة والوقت المقدر
+    useEffect(() => {
+        // نتحقق من وجود كلا الموقعين قبل محاولة الحساب
+        if (driverLocation && customerLocation) {
+            
+            const calculateRouteInfo = async () => {
+                // عرض حالة "جارٍ الحساب" أثناء جلب البيانات
+                setEta("Calculating...");
+                setDistance("Calculating...");
+
+                try {
+                    // 🚀 هذا هو المكان الذي يجب أن يتم فيه استدعاء API لحساب المسار
+                    // يجب عليك إنشاء مسار API (مثلاً: /public/order/route-info)
+                    // على الخادم ليستخدم خدمة مسارات خارجية (مثل Google Maps Directions)
+                    // لحساب المسافة والوقت بين الإحداثيات المرسلة.
+                    const response = await api.post('/orders/route-info', {
+                        origin: driverLocation, // {lat, lng}
+                        destination: customerLocation, // {lat, lng}
+                        // يمكنك إرسال orderId للحصول على بيانات السياق الإضافية
+                    });
+
+                    const routeData = response.data; 
+
+                    // افتراض أن الـ API يعيد بيانات على الشكل:
+                    // { duration: "12 mins", distance: "5.2 km" }
+                    if (routeData && routeData.distance && routeData.duration) {
+                        setDistance(routeData.distance);
+                        setEta(routeData.duration);
+                    } else {
+                        setDistance("N/A");
+                        setEta("N/A");
+                    }
+
+                } catch (error) {
+                    console.error("Error calculating route:", error);
+                    setDistance("N/A");
+                    setEta("Error");
+                }
+            };
+
+            calculateRouteInfo();
+        } else {
+            // إعادة تعيين الحالة إذا لم يكن السائق متتبعًا
+            setDistance(null);
+            setEta(null);
+        }
+        
+    }, [driverLocation, customerLocation, orderId]);
+
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
             <Paper
@@ -124,15 +204,43 @@ export default function CustomerTracking() {
                         }}>
                             Waiting for driver to start moving...
                         </Box>
+
                     )}
 
-                    <MapContainer center={customerLocation || [33.888, 35.495]} zoom={13} style={{ height: "100%", width: "100%" }}>
+                    {/* 🆕 منطقة عرض الوقت والمسافة المقدرة */}
+                    {(driverLocation && eta && distance) && (
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                            <Typography variant="body1" fontWeight="600" color="primary.main" sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
+                                ⏱️ الوقت المقدر: {eta}
+                            </Typography>
+                            <Typography variant="body1" fontWeight="600" color="text.secondary" sx={{ fontSize: { xs: "0.8rem", sm: "1rem" } }}>
+                                📏 المسافة المتبقية: {distance}
+                            </Typography>
+                        </Box>
+                    )}
+
+                    {/* <MapContainer center={customerLocation || [33.888, 35.495]} zoom={13} style={{ height: "100%", width: "100%" }}>
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
                         {customerLocation && <Marker position={[customerLocation.lat, customerLocation.lng]} icon={homeIcon}><Popup><b>My Location</b><br/>Delivery Destination</Popup></Marker>}
                         {driverLocation && <Marker position={[driverLocation.lat, driverLocation.lng]} icon={driverIcon}><Popup><b>Driver is here!</b></Popup></Marker>}
                         {driverLocation && customerLocation && <Polyline positions={[[driverLocation.lat, driverLocation.lng], [customerLocation.lat, customerLocation.lng]]} color="blue" dashArray="10,10" opacity={0.6} />}
                         <MapController driverLoc={driverLocation} customerLoc={customerLocation} />
-                    </MapContainer>
+                    </MapContainer> */}
+
+                    <MapContainer 
+                        // 🚀 تعديل: نستخدم مركز افتراضي (مثل وسط لبنان) فقط إذا لم يكن موقع العميل معروفاً
+                        center={customerLocation ? [customerLocation.lat, customerLocation.lng] : [33.888, 35.495]} 
+                        zoom={13} 
+                        style={{ height: "100%", width: "100%" }}
+                    >
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+                        {customerLocation && <Marker position={[customerLocation.lat, customerLocation.lng]} icon={homeIcon}><Popup><b>My Location</b><br/>Delivery Destination</Popup></Marker>}
+                        {driverLocation && <Marker position={[driverLocation.lat, driverLocation.lng]} icon={driverIcon}><Popup><b>Driver is here!</b></Popup></Marker>}
+                        {driverLocation && customerLocation && <Polyline positions={[[driverLocation.lat, driverLocation.lng], [customerLocation.lat, customerLocation.lng]]} color="blue" dashArray="10,10" opacity={0.6} />}
+ 
+                        {/* استخدام MapController المُحدّثة */}
+                        <MapController driverLoc={driverLocation} customerLoc={customerLocation} /> 
+                </MapContainer>
                 </Box>
                 
                 {/* 🚨 النافذة المنبثقة للتسليم والتقييم */}
