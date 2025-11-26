@@ -19,6 +19,7 @@ const handleLogin = async () => {
     localStorage.setItem("token", res.data.token);
     localStorage.setItem("role", res.data.user.role);
     localStorage.setItem("userId", res.data.user._id);
+    localStorage.setItem("driverId", res.data.user._id)
 
     console.log("Login successful. Role:", res.data.user.role);
 
