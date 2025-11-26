@@ -25,7 +25,7 @@ const homeIcon = new L.Icon({
     popupAnchor: [0, -36]
 });
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://tawsila-mp8n.onrender.com";
 
 // function MapController({ driverLoc, customerLoc }) {
 //     const map = useMap();
