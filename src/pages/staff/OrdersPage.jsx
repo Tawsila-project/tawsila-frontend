@@ -21,7 +21,7 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 import api from "../../components/api";
 import dayjs from "dayjs";
-import Logo from "../../../public/Logo.png";
+import Logo from "../../assets/Logo.png";
 
 
 export default function OrdersPage() {

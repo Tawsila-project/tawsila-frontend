@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, Paper, MenuItem, TextField } from "@mui/material";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 import api from "../../src/components/api";
-import Logo from "../../public/Logo.png";
+import Logo from "../assets/Logo.png";
 
 const COLORS = ["#0ABE51", "#2CA9E3", "#0ABE51", "#2CA9E3", "#0ABE51"];
 

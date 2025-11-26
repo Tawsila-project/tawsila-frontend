@@ -8,7 +8,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import api from "./api";
-import Logo from "../../public/logo.png";
+import Logo from "../assets/Logo.png";
 
 
 const driverIcon = new L.Icon({
@@ -299,7 +299,7 @@ export default function CustomerTracking() {
 // import "leaflet/dist/leaflet.css";
 // import L from "leaflet";
 // import api from "./api";
-// import Logo from "../../public/logo.png";
+// import Logo from "../assets/Logo.png";
 
 
 // const driverIcon = new L.Icon({

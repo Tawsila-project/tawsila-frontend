@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, Paper, MenuItem, Select } from "@mui/material";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../../src/components/api";
-import Logo from "../../public/Logo.png";
+import Logo from "../assets/Logo.png";
 
 export default function OrdersRangeStats() {
   const [range, setRange] = useState("daily");
@@ -66,7 +66,8 @@ export default function OrdersRangeStats() {
 // import React from "react";
 // import { Box, Typography, Paper } from "@mui/material";
 // import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
-// import Logo from "../../public/Logo.png";
+// import Logo from "../assets/Logo.png";
+
 
 // // Sample data
 // const data = [

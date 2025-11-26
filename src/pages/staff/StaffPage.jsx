@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import { Tooltip } from "@mui/material";
 import api from "../../components/api";
-import Logo from "../../../public/Logo.png";
+import Logo from "../../assets/Logo.png";
 
 export default function StaffPage() {
   const [staffList, setStaffList] = useState([]);
