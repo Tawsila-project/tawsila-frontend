@@ -13,6 +13,9 @@ export default function Login() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+
+  console.log(import.meta.env.VITE_API_URL);
+
   const handleLogin = async () => {
     try {
       setLoading(true); // start loading
