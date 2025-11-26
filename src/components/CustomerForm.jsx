@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, useMap, Popup, LayerGroup } from "reac
 import { OpenStreetMapProvider, GeoSearchControl } from "leaflet-geosearch";
 import L from "leaflet";
 import api from "./api";
+import Logo from "../assets/Logo.png";
 
 // Fix default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -141,6 +142,12 @@ export default function CustomerForm() {
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <Paper elevation={6} sx={{ padding: 3, maxWidth: 600, margin: "20px auto", borderRadius: 3 }}>
+
+                <img
+                src={Logo}
+                alt="Company Logo"
+                style={{ width: 90, height: "90", display: "flex" , marginLeft: "auto", marginRight: "auto", marginBottom: 8}}
+            />
                 <Typography variant="h5" fontWeight={600} textAlign="center" mb={3}>Customer Delivery Request</Typography>
 
                 <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
