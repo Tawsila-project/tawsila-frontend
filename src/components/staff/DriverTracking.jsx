@@ -34,7 +34,7 @@ const driverIcon = new L.Icon({
     popupAnchor: [0, -20],
 });
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://tawsila-mp8n.onrender.com";
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://tawsila-backend.onrender.com";
 
 export default function DriverTracking({ initialOrderNumber, driverId }) {
     
