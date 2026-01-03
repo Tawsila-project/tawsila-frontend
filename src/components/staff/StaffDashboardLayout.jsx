@@ -36,52 +36,6 @@ export default function StaffDashboardLayout() {
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
-  // const drawer = (
-  //   <Box
-  //     sx={{
-  //       width: drawerWidth,
-  //       bgcolor: "#0ABE51",
-  //       color: "white",
-  //       height: "100%",
-  //       display: "flex",
-  //       flexDirection: "column",
-  //     }}
-  //   >
-  //     <Typography variant="h6" sx={{ m: 2, fontWeight: 600 }}>
-  //       Staff Panel
-  //     </Typography>
-
-  //     <List sx={{ flexGrow: 1 }}>
-  //       {menu.map((item) => (
-  //         <ListItem
-  //           key={item.name}
-  //           component={NavLink}
-  //           to={item.path}
-  //           sx={{
-  //             "&.active": { bgcolor: "rgba(255,255,255,0.2)", color: "white" },
-  //             "&:hover": { bgcolor: "rgba(0,0,0,0.1)" },
-  //           }}
-  //         >
-  //           <ListItemIcon sx={{ color: "inherit" }}>{item.icon}</ListItemIcon>
-  //           <ListItemText primary={item.name} />
-  //         </ListItem>
-  //       ))}
-  //     </List>
-
-  //     <Box sx={{ p: 2 }}>
-  //       <Button
-  //         variant="contained"
-  //         color="error"
-  //         startIcon={<Logout />}
-  //         fullWidth
-  //         onClick={handleLogout}
-  //       >
-  //         Logout
-  //       </Button>
-  //     </Box>
-  //   </Box>
-  // );
-
 
   const drawer = (
   <Box

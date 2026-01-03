@@ -70,20 +70,50 @@ export default function OrdersPage() {
     setEditStatus(order.status);
   };
 
+  // const handleUpdate = async () => {
+  //   if (!editingOrder) return;
+  //   try {
+  //     const updateData = { status: editStatus };
+
+  //      if (editStatus === "cancelled") {
+  //     updateData.canceledAt = new Date(); // sends current date
+  //   }
+  //     const res = await api.put(`/orders/${editingOrder._id}`, { status: editStatus });
+  //     setOrders((prev) =>
+  //       prev.map((order) => (order._id === editingOrder._id ? res.data.order : order))
+  //     );
+  //     setEditingOrder(null);
+  //     setSnackbar({ open: true, message: "Order updated successfully", severity: "success" });
+  //   } catch (err) {
+  //     console.error("Error updating order:", err.response?.data?.error || err.message);
+  //     setSnackbar({ open: true, message: "Failed to update order", severity: "error" });
+  //   }
+  // };
+
+
   const handleUpdate = async () => {
-    if (!editingOrder) return;
-    try {
-      const res = await api.put(`/orders/${editingOrder._id}`, { status: editStatus });
-      setOrders((prev) =>
-        prev.map((order) => (order._id === editingOrder._id ? res.data.order : order))
-      );
-      setEditingOrder(null);
-      setSnackbar({ open: true, message: "Order updated successfully", severity: "success" });
-    } catch (err) {
-      console.error("Error updating order:", err.response?.data?.error || err.message);
-      setSnackbar({ open: true, message: "Failed to update order", severity: "error" });
+  if (!editingOrder) return;
+  try {
+    const updateData = { status: editStatus };
+
+    // Add cancelledAt if status is cancelled
+    if (editStatus === "cancelled") {
+      updateData.cancelledAt = new Date();
     }
-  };
+
+    // Use updateData here, not just { status: editStatus }
+    const res = await api.put(`/orders/${editingOrder._id}`, updateData);
+
+    setOrders((prev) =>
+      prev.map((order) => (order._id === editingOrder._id ? res.data.order : order))
+    );
+    setEditingOrder(null);
+    setSnackbar({ open: true, message: "Order updated successfully", severity: "success" });
+  } catch (err) {
+    console.error("Error updating order:", err.response?.data?.error || err.message);
+    setSnackbar({ open: true, message: "Failed to update order", severity: "error" });
+  }
+};
 
   const filteredOrders = orders.filter((order) =>
     order.order_number.slice(-6).toLowerCase().includes(search.toLowerCase()) ||
@@ -163,7 +193,20 @@ export default function OrdersPage() {
                   <TableCell sx={{ py: 1, px: 1 }}>
                     <Chip label={order.status} color={statusColor[order.status]} size="small" />
                   </TableCell>
-                  <TableCell sx={{ py: 1, px: 1 }}>{dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}</TableCell>
+                  {/* <TableCell sx={{ py: 1, px: 1 }}>{dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
+                    {order.customer.canceledAt}
+                  </TableCell> */}
+
+                <TableCell sx={{ py: 1, px: 1 }}>
+                  {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
+                  {order.status === "cancelled" && order.cancelledAt && (
+                    <Typography variant="caption" color="error">
+                      {" | Cancelled: " + dayjs(order.cancelledAt).format("DD/MM/YYYY HH:mm")}
+                    </Typography>
+                  )}
+                </TableCell>
+
+
                   <TableCell sx={{ py: 1, px: 1 }}>
                     <IconButton color="primary" onClick={() => handleEdit(order)}>
                       <Edit />
@@ -217,6 +260,7 @@ export default function OrdersPage() {
             <option value="received">Received</option>
             <option value="in_transit">In Transit</option>
             <option value="delivered">Delivered</option>
+            <option value="cancelled">cancelled</option>
           </TextField>
           <Box display="flex" justifyContent="flex-end" gap={1}>
             <Button variant="contained" onClick={handleUpdate}>
@@ -280,102 +324,3 @@ export default function OrdersPage() {
 
 
 
-
-// // src/pages/staff/OrdersPage.jsx
-// import { useState } from "react";
-// import {
-//   Box,
-//   Typography,
-//   TextField,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Paper,
-//   Button,
-//   Chip,
-// } from "@mui/material";
-
-// export default function OrdersPage() {
-//   const [search, setSearch] = useState("");
-
-//   // Dummy orders data
-//   const ordersList = [
-//     { id: "#4353", customer: "Samir", phone: "43434", address: "mina", assigned: "12:32", status: "Received" },
-//     { id: "#5266", customer: "Tarek", phone: "43434", address: "Beirut", assigned: "5:20", status: "Delivered" },
-//     { id: "#7821", customer: "Ahmed", phone: "55665", address: "Abu samra", assigned: "14:10", status: "In Transit" },
-//   ];
-
-//   const filteredOrders = ordersList.filter((order) =>
-//     order.id.toLowerCase().includes(search.toLowerCase()) ||
-//     order.customer.toLowerCase().includes(search.toLowerCase()) ||
-//     order.phone.includes(search) ||
-//     order.address.toLowerCase().includes(search.toLowerCase())
-//   );
-
-//   // Status color mapping
-//   const statusColor = {
-//     "Received": "info",
-//     "Delivered": "success",
-//     "In Transit": "warning",
-//   };
-
-//   return (
-//     <Box p={{ xs: 2, sm: 7 }}>
-//       <Typography variant="h5" fontWeight="bold" mb={3}>
-//         Orders
-//       </Typography>
-
-//       <TextField
-//         label="Search Orders"
-//         value={search}
-//         onChange={(e) => setSearch(e.target.value)}
-//         fullWidth
-//         sx={{ mb: 3 }}
-//       />
-
-//       {/* Responsive Table Wrapper */}
-//       <Box sx={{ overflowX: "auto" }}>
-//         <TableContainer component={Paper}>
-//           <Table sx={{ minWidth: { xs: 600, sm: "100%" } }}>
-//             <TableHead>
-//               <TableRow>
-//                 <TableCell>Order ID</TableCell>
-//                 <TableCell>Customer Name</TableCell>
-//                 <TableCell>Phone</TableCell>
-//                 <TableCell>Address</TableCell>
-//                 <TableCell>Assigned</TableCell>
-//                 <TableCell>Status</TableCell>
-//                 <TableCell>Actions</TableCell>
-//               </TableRow>
-//             </TableHead>
-//             <TableBody>
-//               {filteredOrders.map((order, idx) => (
-//                 <TableRow key={idx}>
-//                   <TableCell>{order.id}</TableCell>
-//                   <TableCell>{order.customer}</TableCell>
-//                   <TableCell>{order.phone}</TableCell>
-//                   <TableCell>{order.address}</TableCell>
-//                   <TableCell>{order.assigned}</TableCell>
-//                   <TableCell>
-//                     <Chip label={order.status} color={statusColor[order.status]} size="small" />
-//                   </TableCell>
-//                   <TableCell>
-//                     <Button size="small" sx={{ mr: 1, mb: { xs: 1, sm: 0 } }} variant="outlined">
-//                       Edit
-//                     </Button>
-//                     <Button size="small" variant="outlined" color="error">
-//                       Delete
-//                     </Button>
-//                   </TableCell>
-//                 </TableRow>
-//               ))}
-//             </TableBody>
-//           </Table>
-//         </TableContainer>
-//       </Box>
-//     </Box>
-//   );
-// }

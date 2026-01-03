@@ -1,7 +1,3 @@
-// **********************************************
-// StaffTrackingPage.jsx — صفحة تتبع السائقين (Staff)
-// **********************************************
-
 import { Box, Typography } from "@mui/material";
 import DriverTracking from "../../components/staff/DriverTracking"; 
 // ⬆️ عدّل المسار حسب موقع ملف DriverTracking

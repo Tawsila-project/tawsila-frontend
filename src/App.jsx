@@ -78,62 +78,7 @@ function App() {
 
   </Routes>
 </BrowserRouter>
-
-    // <BrowserRouter>
-    //   <Routes>
-
-    //       <Route path="/" element={<CustomerForm />} />
-    //       <Route path="/TrackingForm" element={<TrackingForm />} />
-    //       <Route path="/TrackOrderMap" element={<TrackOrderMap />} />
-    //       <Route path="/RateDelivery" element={<RateDelivery />} />
-    //       <Route path="/WelcomeCustomer" element={<WelcomeCustomer />} />
-    //       <Route path="/login" element={<Login />} />
-    //       <Route path="logistics-stats" element={<LogisticsStatsPage />} />
-    //       <Route path="places-stats" element={<PlacesStatsPage />} />
-
-        
-
-
-    //     <Route
-    //       path="/admin"
-    //       element={
-    //         <ProtectedRoute allowedRoles={["admin"]}>
-    //           <DashboardLayout />
-    //         </ProtectedRoute>
-    //       }
-    //     >
-    //       <Route path="logistics-stats" element={<LogisticsStatsPage />} />
-    //       <Route path="places-stats" element={<PlacesStatsPage />} />
-
-    //       <Route path="staff" element={
-    //         <ProtectedRoute allowedRoles={["admin", "staff"]}>
-    //           <StaffPage />
-    //         </ProtectedRoute>
-    //       } />
-    //       <Route path="orders" element={
-    //         <ProtectedRoute allowedRoles={["admin", "staff"]}>
-    //           <OrdersPage />
-    //         </ProtectedRoute>
-    //       } />
-    //     </Route>
-
-    //     <Route
-    //       path="/staff/dashboard"
-    //       element={
-    //         <ProtectedRoute allowedRoles={["staff", "admin"]}>
-    //           <StaffDashboardLayout />
-    //         </ProtectedRoute>
-    //       }
-    //     >
-    //       <Route path="staff" element={<StaffPage />} />
-    //       <Route path="orders" element={<OrdersPage />} />
-    //       <Route path="tracking" element={<StaffTrackingPage />} />
-    //     </Route>
-
-
-    //   </Routes>
-    // </BrowserRouter>
-  );
+ );
 }
 
 export default App;
