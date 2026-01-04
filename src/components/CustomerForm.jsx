@@ -54,34 +54,7 @@ async function getAddress(lat, lng) {
 
 
 // --- Helper: Snap to nearest road/building using OSM Overpass API ---
-// async function snapToNearestRoad(lat, lng, radius = 50) {
-//   try {
-//     // Overpass API query to get nearest highway/road within radius meters
-//     const query = `
-//       [out:json];
-//       (
-//         way(around:${radius},${lat},${lng})["highway"];
-//       );
-//       out center 1;
-//     `;
-//     const url = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
-//     const res = await fetch(url);
-//     const data = await res.json();
-//     if (!data.elements || data.elements.length === 0) return { lat, lng }; // no road found
 
-//     // find closest element
-//     const closest = data.elements.reduce((prev, curr) => {
-//       const dPrev = Math.hypot(prev.lat - lat, prev.lon - lng);
-//       const dCurr = Math.hypot(curr.center.lat - lat, curr.center.lon - lng);
-//       return dCurr < dPrev ? { lat: curr.center.lat, lng: curr.center.lon } : prev;
-//     }, { lat, lng });
-
-//     return closest;
-//   } catch (err) {
-//     console.error("Snap-to-road error:", err);
-//     return { lat, lng };
-//   }
-// }
 
 
 const snapToNearestRoad = async (lat, lng) => {
@@ -133,38 +106,6 @@ function MapClickHandler({ setPosition, setForm }) {
 
 
 // --- Search Control ---
-// function SearchControl({ setPosition, setForm }) {
-//     const map = useMap();
-
-//     useEffect(() => {
-//         const provider = new OpenStreetMapProvider();
-//         const searchControl = new GeoSearchControl({
-//             provider, 
-//             style: "bar", 
-//             showMarker: false, 
-//             retainZoomLevel: false,
-//             animateZoom: true, 
-//             autoClose: true, 
-//             searchLabel: "Enter full street or neighborhood name...", 
-//             keepResult: true,
-//         });
-
-//         map.addControl(searchControl);
-
-//         map.on("geosearch/showlocation", async (result) => {
-//             const { x, y, label } = result.location;
-//             const coords = { lat: y, lng: x };
-//             setPosition(coords);
-//             const address = await getAddress(coords.lat, coords.lng);
-//             setForm(prev => ({ ...prev, customer_address: address }));
-//             map.flyTo(coords, 17);
-//         });
-
-//         return () => map.removeControl(searchControl);
-//     }, [map, setPosition, setForm]);
-
-//     return null;
-// }
 
 function SearchControl({ setPosition, setForm }) {
   const map = useMap();
@@ -320,6 +261,7 @@ export default function CustomerForm() {
         }
 
         try {
+            
             const res = await api.post("/public/order/submit", {
                 customer: {
                     name: form.customer_name,

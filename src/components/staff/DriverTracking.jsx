@@ -803,7 +803,6 @@ const startTracking = () => {
     return speed <= MAX_SPEED_KMH;
   };
 
-  // ❌ تجاهل القفزات غير المنطقية
   if (!isValidMovement(lastPosRef.current, filteredPos, deltaTimeSec)) {
     console.warn("🚫 Ignored unrealistic GPS jump");
     return;
@@ -905,13 +904,11 @@ const handleMarkDelivered = async () => {
   if (!currentOrderId) return;
   setIsConfirmingDelivered(false);
 
-  // إرسال الموقع الأخير و إشعار التسليم
   if (socketRef.current?.connected && currentPos) {
     socketRef.current.emit("update-location", { orderId: currentOrderId, driverId, lat: currentPos.lat, lng: currentPos.lng });
     socketRef.current.emit("order-delivered", { orderId: currentOrderId, driverId });
   }
 
-  // إزالة من localStorage و إعادة تعيين state
   stopTrackingImmediately();
 };
 

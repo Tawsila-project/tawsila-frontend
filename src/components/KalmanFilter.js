@@ -1,7 +1,5 @@
 export class KalmanFilter {
     constructor(R = 0.01, Q = 3) {
-        // R: variance of the process (how much we trust the GPS)
-        // Q: variance of the measurement (noise)
         this.R = R;
         this.Q = Q;
         this.A = 1;
