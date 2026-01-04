@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 
 import { Menu as MenuIcon, People, ShoppingCart, BarChart, Map, Logout } from "@mui/icons-material";
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const drawerWidth = 240;
 
@@ -38,6 +39,8 @@ export default function DashboardLayout() {
         { name: "Orders Control", path: "/admin/orders", icon: <ShoppingCart /> },
         { name: "Drivers logs", path: "/admin/driverLogs", icon: <BarChart /> },
         { name: "Places logs", path: "/admin/placeLogs", icon: <Map /> },
+        { name: "AI-Analytical Tool", path: "/admin/Analytical", icon: <PsychologyIcon /> },
+
       ]
     : [
         { name: "Orders Control", path: "/staff/dashboard/orders", icon: <ShoppingCart /> },

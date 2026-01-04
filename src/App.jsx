@@ -8,6 +8,7 @@ import StaffDashboardLayout from "./components/staff/StaffDashboardLayout";
 // import OrdersElPage from "./pages/OrdersElPage";
 import DriversLogs from "./pages/driversLogsPage";
 import PlacesLogs from "./pages/placeLogsPage";
+import Analytical from "./pages/AdminAnalyticalPage";
 import StaffPage from "./pages/staff/StaffPage";
 import OrdersPage from "./pages/staff/OrdersPage";
 import CustomerForm from "./components/CustomerForm";
@@ -44,6 +45,7 @@ function App() {
     >
       <Route path="driverLogs" element={<DriversLogs />} />
       <Route path="placeLogs" element={<PlacesLogs />} />
+      <Route path="Analytical" element={<Analytical />} />
       <Route
         path="staff"
         element={

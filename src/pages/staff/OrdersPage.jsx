@@ -22,6 +22,8 @@ import { Edit, Delete } from "@mui/icons-material";
 import api from "../../components/api";
 import dayjs from "dayjs";
 import Logo from "../../assets/Logo.png";
+// import  AIChatAdmin from "../../components/AdminAIChatbot/AdminAIChatbot";
+
 
 
 export default function OrdersPage() {
@@ -317,6 +319,8 @@ export default function OrdersPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* <AIChatAdmin ordersData={orders} staffData={staffList} /> */}
     </Box>
   );
 }

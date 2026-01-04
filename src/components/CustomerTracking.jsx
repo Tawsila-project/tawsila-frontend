@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef,useMemo } from "react";
 import { motion } from "framer-motion";
 import { Box, Paper, Typography, LinearProgress, Modal, Button } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -10,37 +10,75 @@ import L from "leaflet";
 import api from "./api";
 import Logo from "../assets/Logo.png";
 
-// 🔹 Icons
-const driverIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/3097/3097136.png",
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-    popupAnchor: [0, -20]
-});
-
-const homeIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/619/619153.png",
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -36]
-});
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || "https://tawsila-backend-0shs.onrender.com";
 
+const isValidLatLng = (loc) =>
+  loc &&
+  typeof loc.lat === "number" &&
+  typeof loc.lng === "number" &&
+  !Number.isNaN(loc.lat) &&
+  !Number.isNaN(loc.lng);
+
 // 🔹 MapController
+// function MapController({ driverLoc, customerLoc }) {
+//     const map = useMap();
+//     useEffect(() => {
+//         const points = [];
+
+//         if (driverLoc) points.push([driverLoc.lat, driverLoc.lng]);
+//         if (customerLoc) points.push([customerLoc.lat, customerLoc.lng]);
+
+//         if (points.length === 2) map.fitBounds(points, { padding: [40, 40], animate: true });
+//         else if (customerLoc) map.setView([customerLoc.lat, customerLoc.lng], 14, { animate: true });
+//     }, [driverLoc, customerLoc, map]);
+
+//     return null;
+// }
+
 function MapController({ driverLoc, customerLoc }) {
-    const map = useMap();
-    useEffect(() => {
-        const points = [];
-        if (driverLoc) points.push([driverLoc.lat, driverLoc.lng]);
-        if (customerLoc) points.push([customerLoc.lat, customerLoc.lng]);
+  const map = useMap();
 
-        if (points.length === 2) map.fitBounds(points, { padding: [40, 40], animate: true });
-        else if (customerLoc) map.setView([customerLoc.lat, customerLoc.lng], 14, { animate: true });
-    }, [driverLoc, customerLoc, map]);
+  useEffect(() => {
+    const points = [];
 
-    return null;
+    if (isValidLatLng(driverLoc))
+      points.push([driverLoc.lat, driverLoc.lng]);
+
+    if (isValidLatLng(customerLoc))
+      points.push([customerLoc.lat, customerLoc.lng]);
+
+    if (points.length === 2) {
+      map.fitBounds(points, { padding: [40, 40], animate: true });
+    } else if (points.length === 1) {
+      map.setView(points[0], 14, { animate: true });
+    }
+  }, [driverLoc, customerLoc, map]);
+
+  return null;
 }
+
+
+
+const hasSignificantMovement = (prev, next, threshold = 30) => {
+    if (!prev || !next) return true;
+
+    const R = 6371000; // earth radius meters
+    const dLat = (next.lat - prev.lat) * Math.PI / 180;
+    const dLng = (next.lng - prev.lng) * Math.PI / 180;
+
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(prev.lat * Math.PI / 180) *
+        Math.cos(next.lat * Math.PI / 180) *
+        Math.sin(dLng / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+
+    return distance > threshold; // مثلاً 30 متر
+};
+
 
 // 🔹 Reverse Geocoding
 const fetchDetailedAddress = async (lat, lng) => {
@@ -63,6 +101,20 @@ const fetchDetailedAddress = async (lat, lng) => {
 
 // 🔹 Main Component
 export default function CustomerTracking() {
+
+      const driverIcon = useMemo(() => new L.Icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/3097/3097136.png",
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -20]
+    }), []);
+
+    const homeIcon = useMemo(() => new L.Icon({
+        iconUrl: "https://cdn-icons-png.flaticon.com/512/619/619153.png",
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -36]
+    }), []);
     const location = useLocation();
     const navigate = useNavigate();
     const [orderId, setOrderId] = useState(location.state?.orderNumber || "");
@@ -74,6 +126,22 @@ export default function CustomerTracking() {
     const socketRef = useRef(null);
     const [isDeliveryComplete, setIsDeliveryComplete] = useState(false);
     const [isCancelled, setIsCancelled] = useState(false);
+    const [customerAddress, setCustomerAddress] = useState(null);
+    const etaHistory = useRef([]);
+
+
+    const smoothETA = (newEta) => {
+    etaHistory.current.push(newEta);
+    if (etaHistory.current.length > 5) etaHistory.current.shift();
+
+    const avg =
+        etaHistory.current.reduce((a, b) => a + b, 0) /
+        etaHistory.current.length;
+
+    return avg;
+};
+
+
 
 
 
@@ -106,39 +174,79 @@ export default function CustomerTracking() {
 
 
     // 🔹 Route info
+    // useEffect(() => {
+    //     if (driverLocation && customerLocation) {
+    //         const calculateRouteInfo = async () => {
+    //             setEta("Calculating...");
+    //             setDistance("Calculating...");
+    //             try {
+    //                 const response = await api.post('/orders/route-info', {
+    //                     origin: driverLocation,
+    //                     destination: customerLocation,
+    //                 });
+    //                 const routeData = response.data;
+    //                   console.log("ROUTE INFO RESPONSE:", response.data);
+
+
+    //                 // setDistance(routeData?.distance || "N/A");
+    //                setDistance(`${(routeData.distance / 1000).toFixed(2)} km`);
+    //                setEta(`${Math.round(routeData.duration / 60)} min`);
+
+
+
+
+    //             } catch (err) {
+    //                 console.error(err);
+    //                 setDistance("N/A");
+    //                 setEta("Error");
+    //             }
+    //         };
+    //         calculateRouteInfo();
+    //     } else {
+    //         setDistance(null);
+    //         setEta(null);
+    //     }
+    // }, [driverLocation, customerLocation]);
+
+    const formatETA = (seconds) => {
+    if (!seconds) return "N/A";
+    const mins = Math.round(seconds / 60);
+    if (mins < 1) return "Less than 1 min";
+    if (mins < 60) return `${mins} min`;
+    const hours = Math.floor(mins / 60);
+    const rem = mins % 60;
+    return `${hours}h ${rem}m`;
+};
+
+
+    const calculateRouteInfo = async (origin, destination) => {
+    try {
+        const { data } = await api.post("/orders/route-info", {
+            origin,
+            destination,
+        });
+        setDistance(`${(data.distance / 1000).toFixed(2)} km`);
+        // setEta(`${Math.round(data.duration / 60)} min`);
+        setEta(formatETA(data.duration));
+
+        const smoothed = smoothETA(data.duration);
+            setEta(formatETA(smoothed));
+
+    } catch {
+        setDistance("N/A");
+        setEta("Error");
+    }
+};
+
+
     useEffect(() => {
         if (driverLocation && customerLocation) {
-            const calculateRouteInfo = async () => {
-                setEta("Calculating...");
-                setDistance("Calculating...");
-                try {
-                    const response = await api.post('/orders/route-info', {
-                        origin: driverLocation,
-                        destination: customerLocation,
-                    });
-                    const routeData = response.data;
-                      console.log("ROUTE INFO RESPONSE:", response.data);
-
-
-                    // setDistance(routeData?.distance || "N/A");
-                   setDistance(`${(routeData.distance / 1000).toFixed(2)} km`);
-                   setEta(`${Math.round(routeData.duration / 60)} min`);
-
-
-
-
-                } catch (err) {
-                    console.error(err);
-                    setDistance("N/A");
-                    setEta("Error");
-                }
-            };
-            calculateRouteInfo();
-        } else {
-            setDistance(null);
-            setEta(null);
+            setEta("Calculating...");
+            setDistance("Calculating...");
+            calculateRouteInfo(driverLocation, customerLocation);
         }
     }, [driverLocation, customerLocation]);
+
 
     // 🔹 WebSocket
     useEffect(() => {
@@ -153,12 +261,32 @@ export default function CustomerTracking() {
         socketRef.current = socket;
         socket.on("connect", () => socket.emit("join-order", orderId));
 
-        socket.on("location-updated", (data) => {
-            if (data && typeof data.lat === "number" && typeof data.lng === "number") setDriverLocation(data);
-            else setDriverLocation(null);
+        // socket.on("location-updated", (data) => {
+        //     if (data && typeof data.lat === "number" && typeof data.lng === "number") setDriverLocation(data);
+        //     else setDriverLocation(null);
+        // });
+
+    //     socket.on("location-updated", (data) => {
+    //     setDriverLocation(prev => {
+    //         if (!prev) return data;
+    //         if (!hasSignificantMovement(prev, data)) return prev;
+    //         return data;
+    //     });
+    // });
+
+    socket.on("location-updated", (data) => {
+        if (!isValidLatLng(data)) return;
+
+        setDriverLocation(prev => {
+            if (!isValidLatLng(prev)) return data;
+            if (!hasSignificantMovement(prev, data)) return prev;
+            return data;
+        });
         });
 
-        socket.on("delivery-complete", () => {
+
+
+        socket.on("order-delivered", () => {
             setStatus("Order Status: Delivered! 🎉");
             setDriverLocation(null);
             setIsDeliveryComplete(true);
@@ -169,6 +297,15 @@ export default function CustomerTracking() {
             setDriverLocation(null);
             setIsCancelled(true);
         });
+
+        socket.on("disconnect", () => {
+        setStatus("Reconnecting to server...");
+             });
+
+    socket.on("reconnect", () => {
+        setStatus("Connected ✅");
+            });
+
 
         return () => socket.disconnect();
     }, [orderId]);
@@ -194,39 +331,47 @@ export default function CustomerTracking() {
     }, [orderId, isDeliveryComplete, isCancelled]);
 
     // 🔹 Route info
-    useEffect(() => {
-        if (driverLocation && customerLocation) {
-            const calculateRouteInfo = async () => {
-                setEta("Calculating...");
-                setDistance("Calculating...");
-                try {
-                    const response = await api.post('/orders/route-info', {
-                        origin: driverLocation,
-                        destination: customerLocation,
-                    });
-                    const routeData = response.data;
-                    setDistance(`${(routeData.distance / 1000).toFixed(2)} km`);
-                    setEta(`${Math.round(routeData.duration / 60)} min`);
-                } catch (err) {
-                    console.error(err);
-                    setDistance("N/A");
-                    setEta("Error");
-                }
-            };
-            calculateRouteInfo();
-        } else {
-            setDistance(null);
-            setEta(null);
-        }
-    }, [driverLocation, customerLocation]);
+    // useEffect(() => {
+    //     if (driverLocation && customerLocation) {
+    //         const calculateRouteInfo = async () => {
+    //             setEta("Calculating...");
+    //             setDistance("Calculating...");
+    //             try {
+    //                 const response = await api.post('/orders/route-info', {
+    //                     origin: driverLocation,
+    //                     destination: customerLocation,
+    //                 });
+    //                 const routeData = response.data;
+    //                 setDistance(`${(routeData.distance / 1000).toFixed(2)} km`);
+    //                 setEta(`${Math.round(routeData.duration / 60)} min`);
+    //             } catch (err) {
+    //                 console.error(err);
+    //                 setDistance("N/A");
+    //                 setEta("Error");
+    //             }
+    //         };
+    //         calculateRouteInfo();
+    //     } else {
+    //         setDistance(null);
+    //         setEta(null);
+    //     }
+    // }, [driverLocation, customerLocation]);
 
     // 🔹 Fetch addresses for markers
+    // useEffect(() => {
+    //     if (customerLocation) {
+    //         fetchDetailedAddress(customerLocation.lat, customerLocation.lng)
+    //             .then(addr => setCustomerLocation(prev => ({ ...prev, address: addr })));
+    //     }
+    // }, [customerLocation?.lat, customerLocation?.lng]);
+
     useEffect(() => {
-        if (customerLocation) {
-            fetchDetailedAddress(customerLocation.lat, customerLocation.lng)
-                .then(addr => setCustomerLocation(prev => ({ ...prev, address: addr })));
-        }
-    }, [customerLocation?.lat, customerLocation?.lng]);
+    if (customerLocation?.lat && customerLocation?.lng) {
+        fetchDetailedAddress(customerLocation.lat, customerLocation.lng)
+            .then(setCustomerAddress);
+    }
+}, [customerLocation?.lat, customerLocation?.lng]);
+
 
     useEffect(() => {
         if (driverLocation) {
@@ -271,11 +416,35 @@ export default function CustomerTracking() {
                            </Box>
                           )}
 
-                    <MapContainer center={customerLocation ? [customerLocation.lat, customerLocation.lng] : [33.888, 35.495]} zoom={13} style={{ height: "100%", width: "100%" }}>
+                    {/* <MapContainer center={customerLocation ? [customerLocation.lat, customerLocation.lng] : [33.888, 35.495]} zoom={13} style={{ height: "100%", width: "100%" }}> */}
+                    <MapContainer
+                        center={
+                            isValidLatLng(customerLocation)
+                            ? [customerLocation.lat, customerLocation.lng]
+                            : [33.888, 35.495]
+                        }
+                        zoom={13}
+                        style={{ height: "100%", width: "100%" }}
+                        >
+
                         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-                        {customerLocation && <Marker position={[customerLocation.lat, customerLocation.lng]} icon={homeIcon}><Popup>{customerLocation.address || "Delivery Destination"}</Popup></Marker>}
-                        {driverLocation && <Marker position={[driverLocation.lat, driverLocation.lng]} icon={driverIcon}><Popup>{driverLocation.address || "Driver is here!"}</Popup></Marker>}
-                        {driverLocation && customerLocation && <Polyline positions={[[driverLocation.lat, driverLocation.lng], [customerLocation.lat, customerLocation.lng]]} color="blue" dashArray="10,10" opacity={0.6} />}
+                        {isValidLatLng (customerLocation) && ( <Marker position={[customerLocation.lat, customerLocation.lng]} icon={homeIcon}><Popup>{customerLocation.address || "Delivery Destination"}</Popup></Marker>)}
+                        {isValidLatLng(driverLocation) && ( <Marker position={[driverLocation.lat, driverLocation.lng]} icon={driverIcon}><Popup>{driverLocation.address || "Driver is here!"}</Popup></Marker>)}
+                        {/* {driverLocation && customerLocation && <Polyline positions={[[driverLocation.lat, driverLocation.lng], [customerLocation.lat, customerLocation.lng]]} color="blue" dashArray="10,10" opacity={0.6} />} */}
+
+                        {isValidLatLng(driverLocation) &&
+                        isValidLatLng(customerLocation) && (
+                        <Polyline
+                            positions={[
+                            [driverLocation.lat, driverLocation.lng],
+                            [customerLocation.lat, customerLocation.lng],
+                            ]}
+                            color="blue"
+                            dashArray="10,10"
+                            opacity={0.6}
+                        />
+                        )}
+
                         <MapController driverLoc={driverLocation} customerLoc={customerLocation} />
                     </MapContainer>
                 </Box>
@@ -300,7 +469,7 @@ export default function CustomerTracking() {
                         width: { xs: "85%", sm: 400 }, p: 4, textAlign: "center", borderRadius: 3,
                         boxShadow: 24, outline: 'none', }}>
                         <Typography variant="h5" fontWeight={700} mb={2}>Order Cancelled ❌</Typography>
-                        <Typography variant="body1" color="text.secondary" mb={3}>Your order **#{orderId}** has been cancelled by the restaurant or driver.</Typography>
+                        <Typography variant="body1" color="text.secondary" mb={3}>Your order **#{orderId}** has been cancelled by the driver.</Typography>
                         <Button variant="outlined" color="inherit" fullWidth onClick={() => { setIsCancelled(false); navigate("/"); }}>Close</Button>
                     </Paper>
                 </Modal>

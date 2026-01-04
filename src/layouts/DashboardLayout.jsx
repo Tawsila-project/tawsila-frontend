@@ -2,6 +2,7 @@ import DashboardSidebar from "../components/admin/Sidebar";
 import { Outlet } from "react-router-dom";
 import { Box } from "@mui/material";
 
+
 const drawerWidth = 240; // make sure it matches the sidebar width
 
 export default function DashboardLayout() {
@@ -23,6 +24,7 @@ export default function DashboardLayout() {
       >
         <Outlet />
       </Box>
+      
     </Box>
   );
 }
