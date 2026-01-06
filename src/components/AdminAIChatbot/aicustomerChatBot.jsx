@@ -24,6 +24,7 @@ import {
 } from "@mui/icons-material";
 
 /**
+ * 
  * TROUBLESHOOTING YOUR REAL APP:
  * 1. API KEY: In your real app, you MUST replace "" with your actual key from https://aistudio.google.com/
  * 2. CORS: Ensure your browser isn't blocking the request (usually not an issue for this API).
